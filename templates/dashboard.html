@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="glass-card p-6 mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Welcome, {{ user.user_name }}!</h1>
+                <p class="text-gray-200">Ready to log your development progress?</p>
+            </div>
+            <div class="flex gap-4">
+                <a href="{{ url_for('create_log') }}" class="btn-primary px-6 py-2 text-white rounded-lg font-semibold">
+                    Create Dev Log
+                </a>
+                <a href="{{ url_for('logout') }}" class="bg-gray-500 hover:bg-gray-600 px-6 py-2 text-white rounded-lg font-semibold">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="glass-card p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Recent Dev Logs</h2>
+        <div id="logs-container" class="space-y-4">
+            <p class="text-gray-200">Loading your dev logs...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load recent logs
+fetch('/api/logs')
+    .then(response => response.json())
+    .then(logs => {
+        const container = document.getElementById('logs-container');
+        if (logs.length === 0) {
+            container.innerHTML = '<p class="text-gray-200">No dev logs yet. Create your first one!</p>';
+            return;
+        }
+        
+        container.innerHTML = logs.map(log => `
+            <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="bg-blue-500 text-white px-2 py-1 rounded text-sm">${log.fields['Project Tag']}</span>
+                    <span class="text-gray-200 text-sm">${log.fields['Time Spent (minutes)']} minutes</span>
+                </div>
+                <h3 class="text-white font-semibold mb-2">${log.fields['Description']}</h3>
+                <p class="text-gray-200 text-sm">${log.fields['What I Did']}</p>
+                ${log.fields['Media URL'] ? `<img src="${log.fields['Media URL']}" class="mt-2 rounded max-w-sm" alt="Dev log media">` : ''}
+            </div>
+        `).join('');
+    })
+    .catch(error => {
+        console.error('Error loading logs:', error);
+        document.getElementById('logs-container').innerHTML = '<p class="text-red-200">Error loading dev logs.</p>';
+    });
+</script>
+{% endblock %}

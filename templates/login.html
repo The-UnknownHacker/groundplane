@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen">
+    <div class="glass-card p-8 max-w-md w-full text-center">
+        <h1 class="text-3xl font-bold text-white mb-2">Dev Log Timer</h1>
+        <p class="text-slate-300 mb-8">Track your development progress</p>
+
+        <a href="{{ auth_url }}" class="btn-primary inline-block px-8 py-3 text-white font-semibold rounded-lg transition duration-200">
+            Login with Slack
+        </a>
+    </div>
+</div>
+{% endblock %}
