@@ -1,82 +1,119 @@
 {% extends "base.html" %}
 
+{% block title %}Edit Dev Log - Grounded Tracker{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
-  <div class="max-w-4xl mx-auto">
-    <div class="glass-card p-8 rounded-xl shadow-xl backdrop-blur bg-slate-800/30 border border-slate-700">
-      <div class="flex justify-between items-center mb-6">
+<div class="max-w-4xl mx-auto px-4 py-8 fade-in">
+  <div class="glass-card p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+      <div class="flex items-center">
+        <div class="bg-primary-500 bg-opacity-20 p-3 rounded-full mr-4">
+          <i class='bx bx-edit-alt text-3xl text-primary-400'></i>
+        </div>
         <h1 class="text-2xl font-bold text-white">Edit Dev Log</h1>
-        <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 text-white rounded-lg transition duration-200">
-          Back to Dashboard
-        </a>
       </div>
+      <a href="{{ url_for('index') }}" class="flex items-center bg-slate-700 hover:bg-slate-600 px-4 py-2 text-white rounded-lg transition-all duration-300">
+        <i class='bx bx-arrow-back mr-2'></i> Back to Dashboard
+      </a>
+    </div>
 
-      <div id="loading" class="text-center py-8">
-        <p class="text-white">Loading log data...</p>
+    <div id="loading" class="text-center py-12 animate__animated animate__fadeIn">
+      <div class="flex flex-col items-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mb-4"></div>
+        <p class="text-white text-lg">Loading log data...</p>
       </div>
+    </div>
 
-      <form id="edit-form" method="POST" class="space-y-6 hidden">
+      <form id="edit-form" method="POST" class="space-y-6 hidden animate__animated animate__fadeIn">
         <input type="hidden" id="record_id" name="record_id">
-        <div>
-          <label class="block text-white font-semibold mb-2">Project Tag</label>
-          <select id="project_tag" name="project_tag" required class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none">
-            <option value="">Select a tag...</option>
-            <option value="CAD">CAD</option>
-            <option value="PCB">PCB</option>
-            <option value="Hardware">Hardware</option>
-            <option value="Software">Software</option>
-            <option value="3D Printing">3D Printing</option>
-            <option value="Research">Research</option>
-          </select>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-tag-alt mr-2'></i> Project Tag
+            </label>
+            <select id="project_tag" name="project_tag" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300">
+              <option value="">Select a tag...</option>
+              <option value="CAD">CAD</option>
+              <option value="PCB">PCB</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Software">Software</option>
+              <option value="3D Printing">3D Printing</option>
+              <option value="Research">Research</option>
+            </select>
+          </div>
+
+          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-rename mr-2'></i> Project Name
+            </label>
+            <input type="text" id="project_name" name="project_name" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Project Name">
+          </div>
         </div>
 
-        <div>
-          <label class="block text-white font-semibold mb-2">Project Name</label>
-          <input type="text" id="project_name" name="project_name" required class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Project Name">
+        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+          <label class="flex items-center text-primary-300 font-semibold mb-3">
+            <i class='bx bx-info-circle mr-2'></i> Description
+          </label>
+          <input type="text" id="description" name="description" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Brief description of your work session">
         </div>
 
-        <div>
-          <label class="block text-white font-semibold mb-2">Description</label>
-          <input type="text" id="description" name="description" required class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Brief description of your work session">
+        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+          <label class="flex items-center text-primary-300 font-semibold mb-3">
+            <i class='bx bx-task mr-2'></i> What I Did
+          </label>
+          <textarea id="what_did" name="what_did" required rows="4" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Describe what you accomplished..."></textarea>
         </div>
 
-        <div>
-          <label class="block text-white font-semibold mb-2">What I Did</label>
-          <textarea id="what_did" name="what_did" required rows="4" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Describe what you accomplished..."></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-revision mr-2'></i> Could Have Done Better
+            </label>
+            <textarea id="could_improve" name="could_improve" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Reflect on what could have been improved..."></textarea>
+          </div>
+
+          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-trending-up mr-2'></i> What I Can Improve
+            </label>
+            <textarea id="can_improve" name="can_improve" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Areas for improvement..."></textarea>
+          </div>
+
+          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-chevrons-right mr-2'></i> Next Steps
+            </label>
+            <textarea id="next_steps" name="next_steps" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="What you plan to do next..."></textarea>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-white font-semibold mb-2">What I Could Have Done Better</label>
-          <textarea id="could_improve" name="could_improve" rows="3" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Reflect on what could have been improved..."></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-time mr-2'></i> Time Spent (minutes)
+            </label>
+            <input type="number" id="time_spent" name="time_spent" required min="1" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="How many minutes did you spend?">
+          </div>
+
+          <div id="media-preview" class="hidden bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+            <label class="flex items-center text-primary-300 font-semibold mb-3">
+              <i class='bx bx-image-alt mr-2'></i> Current Media
+            </label>
+            <div class="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+              <img id="media-image" src="" class="w-full object-cover hover:scale-105 transition-all duration-500 rounded-lg" alt="Dev log media">
+            </div>
+            <p class="text-slate-400 text-sm mt-2 flex items-center">
+              <i class='bx bx-info-circle mr-1'></i> Media cannot be changed after upload
+            </p>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-white font-semibold mb-2">What I Can Improve</label>
-          <textarea id="can_improve" name="can_improve" rows="3" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Areas for improvement..."></textarea>
-        </div>
-
-        <div>
-          <label class="block text-white font-semibold mb-2">Next Steps</label>
-          <textarea id="next_steps" name="next_steps" rows="3" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="What you plan to do next..."></textarea>
-        </div>
-
-        <div>
-          <label class="block text-white font-semibold mb-2">Time Spent (minutes)</label>
-          <input type="number" id="time_spent" name="time_spent" required min="1" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="How many minutes did you spend?">
-        </div>
-
-        <div id="media-preview" class="hidden">
-          <label class="block text-white font-semibold mb-2">Current Media</label>
-          <img id="media-image" src="" class="max-w-sm rounded mb-2">
-          <p class="text-slate-400 text-sm">Media cannot be changed after upload</p>
-        </div>
-
-        <div class="flex gap-4">
-          <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 px-8 py-3 text-white font-semibold rounded-lg transition duration-200">
-            Update Dev Log
+        <div class="flex flex-col sm:flex-row gap-4 mt-8">
+          <button type="submit" class="btn-primary px-8 py-3 text-white font-semibold rounded-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-primary-500/20">
+            <i class='bx bx-save text-xl'></i> Update Dev Log
           </button>
-          <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 text-white font-semibold rounded-lg transition duration-200">
-            Cancel
+          <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-300 shadow-lg">
+            <i class='bx bx-x text-xl'></i> Cancel
           </a>
         </div>
       </form>
@@ -89,25 +126,38 @@
 </div>
 
 <script>
-  // Get record ID from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const recordId = urlParams.get('id');
-  
-  if (!recordId) {
-    document.getElementById('loading').textContent = 'Error: No log ID provided';
-  } else {
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get record_id from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const recordId = urlParams.get('id');
+    
+    if (!recordId) {
+      window.location.href = '{{ url_for("index") }}';
+      return;
+    }
+
+    // Set the hidden input value
     document.getElementById('record_id').value = recordId;
     
-    // Fetch log data
+    // Loading element with animation
+    const loadingEl = document.getElementById('loading');
+    loadingEl.innerHTML = `
+      <div class="flex flex-col items-center justify-center animate__animated animate__pulse animate__infinite">
+        <i class='bx bx-loader-alt bx-spin text-primary-400 text-4xl mb-3'></i>
+        <p class="text-primary-300">Loading log data...</p>
+      </div>
+    `;
+    
+    // Fetch the log data
     fetch(`/api/logs/${recordId}`)
       .then(response => {
         if (!response.ok) {
-          throw new Error('Failed to load log data');
+          throw new Error('Failed to fetch log data');
         }
         return response.json();
       })
       .then(data => {
-        // Fill form with log data
+        // Populate form fields
         document.getElementById('project_tag').value = data.fields['Project Tag'];
         document.getElementById('project_name').value = data.fields['Project Name'];
         document.getElementById('description').value = data.fields['Description'];
@@ -117,63 +167,101 @@
         document.getElementById('next_steps').value = data.fields['Next Steps'] || '';
         document.getElementById('time_spent').value = data.fields['Time Spent (minutes)'];
         
-        // Show media if available
+        // Show media if exists
         if (data.fields['Media URL']) {
           document.getElementById('media-image').src = data.fields['Media URL'];
           document.getElementById('media-preview').classList.remove('hidden');
         }
         
-        // Show form, hide loading
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('edit-form').classList.remove('hidden');
+        // Hide loading with animation, show form
+        loadingEl.classList.add('animate__animated', 'animate__fadeOut');
+        setTimeout(() => {
+          loadingEl.classList.add('hidden');
+          document.getElementById('edit-form').classList.remove('hidden');
+        }, 300);
       })
       .catch(error => {
         console.error('Error:', error);
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('error-message').classList.remove('hidden');
-        document.getElementById('error-message').textContent = error.message;
+        loadingEl.classList.remove('animate__pulse', 'animate__infinite');
+        loadingEl.innerHTML = `
+          <div class="bg-red-500 bg-opacity-20 p-6 rounded-lg text-center animate__animated animate__shakeX">
+            <i class='bx bx-error-circle text-red-400 text-4xl mb-3'></i>
+            <p class="text-red-300 mb-4">Error loading log data</p>
+            <button onclick="window.location.reload()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center mx-auto">
+              <i class='bx bx-refresh mr-2'></i> Try Again
+            </button>
+          </div>
+        `;
       });
-  }
-  
-  // Handle form submission
-  document.getElementById('edit-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = {
-      project_tag: document.getElementById('project_tag').value,
-      project_name: document.getElementById('project_name').value,
-      description: document.getElementById('description').value,
-      what_did: document.getElementById('what_did').value,
-      could_improve: document.getElementById('could_improve').value,
-      can_improve: document.getElementById('can_improve').value,
-      next_steps: document.getElementById('next_steps').value,
-      time_spent: parseInt(document.getElementById('time_spent').value)
-    };
-    
-    fetch(`/api/logs/${recordId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to update log');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        window.location.href = '/?updated=true';
-      } else {
-        throw new Error(data.message || 'Failed to update log');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      document.getElementById('error-message').classList.remove('hidden');
-      document.getElementById('error-message').textContent = error.message;
+
+    // Handle form submission
+    document.getElementById('edit-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Show loading state on button
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Updating...`;
+      
+      const formData = {
+        project_tag: document.getElementById('project_tag').value,
+        project_name: document.getElementById('project_name').value,
+        description: document.getElementById('description').value,
+        what_did: document.getElementById('what_did').value,
+        could_improve: document.getElementById('could_improve').value,
+        can_improve: document.getElementById('can_improve').value,
+        next_steps: document.getElementById('next_steps').value,
+        time_spent: parseInt(document.getElementById('time_spent').value)
+      };
+      
+      fetch(`/api/logs/${recordId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to update log');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Show success animation before redirecting
+        submitBtn.innerHTML = `<i class='bx bx-check'></i> Updated!`;
+        submitBtn.classList.add('animate__animated', 'animate__pulse');
+        
+        setTimeout(() => {
+          window.location.href = '{{ url_for("index") }}?updated=true';
+        }, 500);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        
+        // Show error message with animation
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'bg-red-500 bg-opacity-20 p-4 rounded-lg text-center mt-4 animate__animated animate__shakeX';
+        errorMsg.innerHTML = `
+          <div class="flex items-center justify-center">
+            <i class='bx bx-error-circle text-red-400 text-xl mr-2'></i>
+            <p class="text-red-300">Failed to update log. Please try again.</p>
+          </div>
+        `;
+        
+        // Insert error message after the buttons
+        const buttonsContainer = document.querySelector('.flex.flex-col.sm\\:flex-row');
+        buttonsContainer.parentNode.insertBefore(errorMsg, buttonsContainer.nextSibling);
+        
+        // Remove error message after 5 seconds
+        setTimeout(() => {
+          errorMsg.classList.add('animate__fadeOut');
+          setTimeout(() => errorMsg.remove(), 500);
+        }, 5000);
+      });
     });
   });
 </script>
