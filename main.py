@@ -251,6 +251,122 @@ def get_logs():
         logger.error(f"Error fetching logs: {str(e)}")
         return jsonify([])
 
+@app.route('/api/logs/<record_id>', methods=['DELETE'])
+@login_required
+def delete_log(record_id):
+    """Delete a dev log entry from Airtable"""
+    try:
+        # First verify that this log belongs to the current user
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        # Get the record first to verify ownership
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"Failed to fetch log for deletion verification: {response.text}")
+            return jsonify({"success": False, "message": "Log not found"}), 404
+            
+        log_data = response.json()
+        if log_data.get('fields', {}).get('User ID') != session['user_id']:
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+        
+        # Now delete the record
+        delete_response = requests.delete(url, headers=headers)
+        
+        if delete_response.status_code == 200:
+            return jsonify({"success": True, "message": "Log deleted successfully"})
+        else:
+            logger.error(f"Airtable delete failed: {delete_response.text}")
+            return jsonify({"success": False, "message": "Failed to delete log"}), 500
+            
+    except Exception as e:
+        logger.error(f"Error deleting log: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+@app.route('/api/logs/<record_id>', methods=['GET'])
+@login_required
+def get_log(record_id):
+    """Get a specific dev log entry from Airtable"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            log_data = response.json()
+            # Verify this log belongs to the current user
+            if log_data.get('fields', {}).get('User ID') != session['user_id']:
+                return jsonify({"success": False, "message": "Unauthorized"}), 403
+                
+            return jsonify(log_data)
+        else:
+            logger.error(f"Airtable fetch failed: {response.text}")
+            return jsonify({"success": False, "message": "Log not found"}), 404
+            
+    except Exception as e:
+        logger.error(f"Error fetching log: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+@app.route('/api/logs/<record_id>', methods=['PATCH'])
+@login_required
+def update_log(record_id):
+    """Update a dev log entry in Airtable"""
+    try:
+        # First verify that this log belongs to the current user
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Get the record first to verify ownership
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"Failed to fetch log for update verification: {response.text}")
+            return jsonify({"success": False, "message": "Log not found"}), 404
+            
+        log_data = response.json()
+        if log_data.get('fields', {}).get('User ID') != session['user_id']:
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+        
+        # Get the updated data from the request
+        update_data = request.json
+        
+        # Prepare the update payload
+        fields = {
+            'Project Name': update_data.get('project_name'),
+            'Project Tag': update_data.get('project_tag'),
+            'Description': update_data.get('description'),
+            'What I Did': update_data.get('what_did'),
+            'Could Have Done Better': update_data.get('could_improve'),
+            'What I Can Improve': update_data.get('can_improve'),
+            'Next Steps': update_data.get('next_steps'),
+            'Time Spent (minutes)': update_data.get('time_spent')
+        }
+        
+        # Remove None values
+        fields = {k: v for k, v in fields.items() if v is not None}
+        
+        # Update the record
+        update_payload = {
+            'fields': fields
+        }
+        
+        update_response = requests.patch(url, headers=headers, json=update_payload)
+        
+        if update_response.status_code == 200:
+            return jsonify({"success": True, "message": "Log updated successfully", "data": update_response.json()})
+        else:
+            logger.error(f"Airtable update failed: {update_response.text}")
+            return jsonify({"success": False, "message": "Failed to update log"}), 500
+            
+    except Exception as e:
+        logger.error(f"Error updating log: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
 @app.route('/')
 def index():
     if 'user_id' not in session:
@@ -384,6 +500,17 @@ def create_log():
             flash('Error creating dev log. Please try again.', 'error')
     
     return render_template('create_log.html')
+
+@app.route('/edit-log')
+@login_required
+def edit_log():
+    """Render the edit log page"""
+    record_id = request.args.get('id')
+    if not record_id:
+        flash('No log ID provided', 'error')
+        return redirect(url_for('index'))
+        
+    return render_template('edit_log.html')
 
 if __name__ == '__main__':
     

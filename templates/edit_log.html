@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="glass-card p-8 rounded-xl shadow-xl backdrop-blur bg-slate-800/30 border border-slate-700">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-white">Edit Dev Log</h1>
+        <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 text-white rounded-lg transition duration-200">
+          Back to Dashboard
+        </a>
+      </div>
+
+      <div id="loading" class="text-center py-8">
+        <p class="text-white">Loading log data...</p>
+      </div>
+
+      <form id="edit-form" method="POST" class="space-y-6 hidden">
+        <input type="hidden" id="record_id" name="record_id">
+        <div>
+          <label class="block text-white font-semibold mb-2">Project Tag</label>
+          <select id="project_tag" name="project_tag" required class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none">
+            <option value="">Select a tag...</option>
+            <option value="CAD">CAD</option>
+            <option value="PCB">PCB</option>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+            <option value="3D Printing">3D Printing</option>
+            <option value="Research">Research</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">Project Name</label>
+          <input type="text" id="project_name" name="project_name" required class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Project Name">
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">Description</label>
+          <input type="text" id="description" name="description" required class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Brief description of your work session">
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">What I Did</label>
+          <textarea id="what_did" name="what_did" required rows="4" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Describe what you accomplished..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">What I Could Have Done Better</label>
+          <textarea id="could_improve" name="could_improve" rows="3" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Reflect on what could have been improved..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">What I Can Improve</label>
+          <textarea id="can_improve" name="can_improve" rows="3" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="Areas for improvement..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">Next Steps</label>
+          <textarea id="next_steps" name="next_steps" rows="3" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="What you plan to do next..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-white font-semibold mb-2">Time Spent (minutes)</label>
+          <input type="number" id="time_spent" name="time_spent" required min="1" class="w-full p-3 rounded-lg bg-white bg-opacity-10 text-white placeholder-slate-300 focus:outline-none" placeholder="How many minutes did you spend?">
+        </div>
+
+        <div id="media-preview" class="hidden">
+          <label class="block text-white font-semibold mb-2">Current Media</label>
+          <img id="media-image" src="" class="max-w-sm rounded mb-2">
+          <p class="text-slate-400 text-sm">Media cannot be changed after upload</p>
+        </div>
+
+        <div class="flex gap-4">
+          <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 px-8 py-3 text-white font-semibold rounded-lg transition duration-200">
+            Update Dev Log
+          </button>
+          <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 text-white font-semibold rounded-lg transition duration-200">
+            Cancel
+          </a>
+        </div>
+      </form>
+
+      <div id="error-message" class="hidden bg-red-500 text-white p-4 rounded-lg mt-4">
+        Failed to load log data. Please try again.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Get record ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const recordId = urlParams.get('id');
+  
+  if (!recordId) {
+    document.getElementById('loading').textContent = 'Error: No log ID provided';
+  } else {
+    document.getElementById('record_id').value = recordId;
+    
+    // Fetch log data
+    fetch(`/api/logs/${recordId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load log data');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Fill form with log data
+        document.getElementById('project_tag').value = data.fields['Project Tag'];
+        document.getElementById('project_name').value = data.fields['Project Name'];
+        document.getElementById('description').value = data.fields['Description'];
+        document.getElementById('what_did').value = data.fields['What I Did'];
+        document.getElementById('could_improve').value = data.fields['Could Have Done Better'] || '';
+        document.getElementById('can_improve').value = data.fields['What I Can Improve'] || '';
+        document.getElementById('next_steps').value = data.fields['Next Steps'] || '';
+        document.getElementById('time_spent').value = data.fields['Time Spent (minutes)'];
+        
+        // Show media if available
+        if (data.fields['Media URL']) {
+          document.getElementById('media-image').src = data.fields['Media URL'];
+          document.getElementById('media-preview').classList.remove('hidden');
+        }
+        
+        // Show form, hide loading
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('edit-form').classList.remove('hidden');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error-message').classList.remove('hidden');
+        document.getElementById('error-message').textContent = error.message;
+      });
+  }
+  
+  // Handle form submission
+  document.getElementById('edit-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+      project_tag: document.getElementById('project_tag').value,
+      project_name: document.getElementById('project_name').value,
+      description: document.getElementById('description').value,
+      what_did: document.getElementById('what_did').value,
+      could_improve: document.getElementById('could_improve').value,
+      can_improve: document.getElementById('can_improve').value,
+      next_steps: document.getElementById('next_steps').value,
+      time_spent: parseInt(document.getElementById('time_spent').value)
+    };
+    
+    fetch(`/api/logs/${recordId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update log');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        window.location.href = '/?updated=true';
+      } else {
+        throw new Error(data.message || 'Failed to update log');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      document.getElementById('error-message').classList.remove('hidden');
+      document.getElementById('error-message').textContent = error.message;
+    });
+  });
+</script>
+{% endblock %}
