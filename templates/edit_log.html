@@ -127,7 +127,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Get record_id from URL
     const urlParams = new URLSearchParams(window.location.search);
     const recordId = urlParams.get('id');
     
@@ -136,10 +135,8 @@
       return;
     }
 
-    // Set the hidden input value
     document.getElementById('record_id').value = recordId;
     
-    // Loading element with animation
     const loadingEl = document.getElementById('loading');
     loadingEl.innerHTML = `
       <div class="flex flex-col items-center justify-center animate__animated animate__pulse animate__infinite">
@@ -148,7 +145,6 @@
       </div>
     `;
     
-    // Fetch the log data
     fetch(`/api/logs/${recordId}`)
       .then(response => {
         if (!response.ok) {
@@ -157,7 +153,6 @@
         return response.json();
       })
       .then(data => {
-        // Populate form fields
         document.getElementById('project_tag').value = data.fields['Project Tag'];
         document.getElementById('project_name').value = data.fields['Project Name'];
         document.getElementById('description').value = data.fields['Description'];
@@ -167,13 +162,11 @@
         document.getElementById('next_steps').value = data.fields['Next Steps'] || '';
         document.getElementById('time_spent').value = data.fields['Time Spent (minutes)'];
         
-        // Show media if exists
         if (data.fields['Media URL']) {
           document.getElementById('media-image').src = data.fields['Media URL'];
           document.getElementById('media-preview').classList.remove('hidden');
         }
         
-        // Hide loading with animation, show form
         loadingEl.classList.add('animate__animated', 'animate__fadeOut');
         setTimeout(() => {
           loadingEl.classList.add('hidden');
@@ -194,11 +187,9 @@
         `;
       });
 
-    // Handle form submission
     document.getElementById('edit-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      // Show loading state on button
       const submitBtn = this.querySelector('button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       submitBtn.disabled = true;
@@ -229,7 +220,6 @@
         return response.json();
       })
       .then(data => {
-        // Show success animation before redirecting
         submitBtn.innerHTML = `<i class='bx bx-check'></i> Updated!`;
         submitBtn.classList.add('animate__animated', 'animate__pulse');
         
@@ -242,7 +232,6 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
         
-        // Show error message with animation
         const errorMsg = document.createElement('div');
         errorMsg.className = 'bg-red-500 bg-opacity-20 p-4 rounded-lg text-center mt-4 animate__animated animate__shakeX';
         errorMsg.innerHTML = `
@@ -252,11 +241,9 @@
           </div>
         `;
         
-        // Insert error message after the buttons
         const buttonsContainer = document.querySelector('.flex.flex-col.sm\\:flex-row');
         buttonsContainer.parentNode.insertBefore(errorMsg, buttonsContainer.nextSibling);
         
-        // Remove error message after 5 seconds
         setTimeout(() => {
           errorMsg.classList.add('animate__fadeOut');
           setTimeout(() => errorMsg.remove(), 500);

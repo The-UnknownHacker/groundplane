@@ -256,11 +256,9 @@ def get_logs():
 def delete_log(record_id):
     """Delete a dev log entry from Airtable"""
     try:
-        # First verify that this log belongs to the current user
         url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
         headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
         
-        # Get the record first to verify ownership
         response = requests.get(url, headers=headers)
         
         if response.status_code != 200:
@@ -271,7 +269,6 @@ def delete_log(record_id):
         if log_data.get('fields', {}).get('User ID') != session['user_id']:
             return jsonify({"success": False, "message": "Unauthorized"}), 403
         
-        # Now delete the record
         delete_response = requests.delete(url, headers=headers)
         
         if delete_response.status_code == 200:
@@ -296,7 +293,6 @@ def get_log(record_id):
         
         if response.status_code == 200:
             log_data = response.json()
-            # Verify this log belongs to the current user
             if log_data.get('fields', {}).get('User ID') != session['user_id']:
                 return jsonify({"success": False, "message": "Unauthorized"}), 403
                 
@@ -314,14 +310,12 @@ def get_log(record_id):
 def update_log(record_id):
     """Update a dev log entry in Airtable"""
     try:
-        # First verify that this log belongs to the current user
         url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
         headers = {
             'Authorization': f'Bearer {AIRTABLE_API_KEY}',
             'Content-Type': 'application/json'
         }
         
-        # Get the record first to verify ownership
         response = requests.get(url, headers=headers)
         
         if response.status_code != 200:
@@ -332,10 +326,8 @@ def update_log(record_id):
         if log_data.get('fields', {}).get('User ID') != session['user_id']:
             return jsonify({"success": False, "message": "Unauthorized"}), 403
         
-        # Get the updated data from the request
         update_data = request.json
         
-        # Prepare the update payload
         fields = {
             'Project Name': update_data.get('project_name'),
             'Project Tag': update_data.get('project_tag'),
@@ -347,10 +339,8 @@ def update_log(record_id):
             'Time Spent (minutes)': update_data.get('time_spent')
         }
         
-        # Remove None values
         fields = {k: v for k, v in fields.items() if v is not None}
         
-        # Update the record
         update_payload = {
             'fields': fields
         }
@@ -366,6 +356,259 @@ def update_log(record_id):
     except Exception as e:
         logger.error(f"Error updating log: {str(e)}")
         return jsonify({"success": False, "message": "An error occurred"}), 500
+
+import re
+
+AIRTABLE_PROJECTS_TABLE = os.environ.get('AIRTABLE_PROJECTS_TABLE', 'Projects')
+
+def save_project_to_airtable(project_data):
+    """Save project to Airtable using Personal Access Token"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        if project_data['project_tag'] == 'undefined' or not project_data['project_tag']:
+            project_data['project_tag'] = 'Other' 
+        
+        data = {
+            'fields': {
+                'User ID': project_data['user_id'],
+                'User Name': project_data['user_name'],
+                'Project Name': project_data['project_name'],
+                'Project Tag': project_data['project_tag'],
+                'Description': project_data['description'],
+                'Created At': project_data['created_at']
+            }
+        }
+        
+        response = requests.post(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"Airtable project save failed: {response.text}")
+            return None
+    except Exception as e:
+        logger.error(f"Error saving project to Airtable: {str(e)}")
+        return None
+
+@app.route('/api/projects')
+@login_required
+def get_projects():
+    """Get user's projects from Airtable"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        params = {
+            'filterByFormula': f"{{User ID}} = '{session['user_id']}'",
+            'sort[0][field]': 'Created At',
+            'sort[0][direction]': 'desc'
+        }
+        
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify(data['records'])
+        else:
+            logger.error(f"Airtable fetch failed: {response.text}")
+            return jsonify([])
+            
+    except Exception as e:
+        logger.error(f"Error fetching projects: {str(e)}")
+        return jsonify([])
+
+@app.route('/api/projects', methods=['POST'])
+@login_required
+def create_project():
+    """Create a new project"""
+    try:
+        data = request.json
+        
+        project_data = {
+            'user_id': session['user_id'],
+            'user_name': session['user_name'],
+            'project_name': data.get('project_name'),
+            'project_tag': data.get('project_tag'),
+            'description': data.get('description'),
+            'status': data.get('status', 'Active'),
+            'created_at': datetime.now().isoformat()
+        }
+        
+        result = save_project_to_airtable(project_data)
+        
+        if result:
+            return jsonify({"success": True, "message": "Project created successfully", "data": result})
+        else:
+            return jsonify({"success": False, "message": "Failed to create project"}), 500
+            
+    except Exception as e:
+        logger.error(f"Error creating project: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+@app.route('/api/projects/<record_id>', methods=['GET'])
+@login_required
+def get_project(record_id):
+    """Get a specific project from Airtable"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            project_data = response.json()
+            if project_data.get('fields', {}).get('User ID') != session['user_id']:
+                return jsonify({"success": False, "message": "Unauthorized"}), 403
+                
+            return jsonify(project_data)
+        else:
+            logger.error(f"Airtable fetch failed: {response.text}")
+            return jsonify({"success": False, "message": "Project not found"}), 404
+            
+    except Exception as e:
+        logger.error(f"Error fetching project: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+@app.route('/api/projects/<record_id>', methods=['PATCH'])
+@login_required
+def update_project(record_id):
+    """Update a project in Airtable"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}/{record_id}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"Failed to fetch project for update verification: {response.text}")
+            return jsonify({"success": False, "message": "Project not found"}), 404
+            
+        project_data = response.json()
+        if project_data.get('fields', {}).get('User ID') != session['user_id']:
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+        
+        update_data = request.json
+        
+        fields = {
+            'Project Name': update_data.get('project_name'),
+            'Project Tag': update_data.get('project_tag'),
+            'Description': update_data.get('description'),
+            'Cover Image URL': update_data.get('cover_image_url')
+        }
+        
+        fields = {k: v for k, v in fields.items() if v is not None}
+        
+        update_payload = {
+            'fields': fields
+        }
+        
+        update_response = requests.patch(url, headers=headers, json=update_payload)
+        
+        if update_response.status_code == 200:
+            return jsonify({"success": True, "message": "Project updated successfully", "data": update_response.json()})
+        else:
+            logger.error(f"Airtable update failed: {update_response.text}")
+            return jsonify({"success": False, "message": "Failed to update project"}), 500
+            
+    except Exception as e:
+        logger.error(f"Error updating project: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+@app.route('/api/projects/<record_id>', methods=['DELETE'])
+@login_required
+def delete_project(record_id):
+    """Delete a project from Airtable"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"Failed to fetch project for deletion verification: {response.text}")
+            return jsonify({"success": False, "message": "Project not found"}), 404
+            
+        project_data = response.json()
+        if project_data.get('fields', {}).get('User ID') != session['user_id']:
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+        
+        delete_response = requests.delete(url, headers=headers)
+        
+        if delete_response.status_code == 200:
+            return jsonify({"success": True, "message": "Project deleted successfully"})
+        else:
+            logger.error(f"Airtable delete failed: {delete_response.text}")
+            return jsonify({"success": False, "message": "Failed to delete project"}), 500
+            
+    except Exception as e:
+        logger.error(f"Error deleting project: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred"}), 500
+
+@app.route('/create-project', methods=['GET', 'POST'])
+@login_required
+def create_project_page():
+    """Render the create project page"""
+    if request.method == 'POST':
+        try:
+            project_name = request.form.get('project_name')
+            project_tag = request.form.get('project_tag')
+            description = request.form.get('description')
+            status = request.form.get('status', 'Active')
+            
+            project_data = {
+                'user_id': session['user_id'],
+                'user_name': session['user_name'],
+                'project_name': project_name,
+                'project_tag': project_tag,
+                'description': description,
+                'status': status,
+                'created_at': datetime.now().isoformat()
+            }
+            
+            airtable_result = save_project_to_airtable(project_data)
+            
+            if airtable_result:
+                flash('Project created successfully!', 'success')
+                return redirect(url_for('index'))
+            else:
+                flash('Error saving project. Please try again.', 'error')
+                
+        except Exception as e:
+            logger.error(f"Error creating project: {str(e)}")
+            flash('Error creating project. Please try again.', 'error')
+    
+    return render_template('create_project.html')
+
+@app.route('/edit-project')
+@login_required
+def edit_project_page():
+    """Render the edit project page"""
+    record_id = request.args.get('id')
+    if not record_id:
+        flash('No project ID provided', 'error')
+        return redirect(url_for('index'))
+        
+    return render_template('edit_project.html')
+
+@app.route('/project/<project_id>')
+@login_required
+def project_detail(project_id):
+    """Render the project detail page"""
+    return render_template('project_detail.html', project_id=project_id)
+
+@app.route('/projects')
+@login_required
+def projects():
+    """Render the projects dashboard"""
+    return render_template('projects.html', user=session)
 
 @app.route('/')
 def index():
@@ -434,7 +677,11 @@ def logout():
 
 @app.route('/create-log', methods=['GET', 'POST'])
 @login_required
+
 def create_log():
+    project_name = request.args.get('project', '')
+    project_tag = request.args.get('project_tag', '')
+    
     if request.method == 'POST':
         try:
             project_tag = request.form.get('project_tag')
@@ -499,7 +746,7 @@ def create_log():
             logger.error(f"Error creating log: {str(e)}")
             flash('Error creating dev log. Please try again.', 'error')
     
-    return render_template('create_log.html')
+    return render_template('create_log.html', project_name=project_name, project_tag=project_tag)
 
 @app.route('/edit-log')
 @login_required

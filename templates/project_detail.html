@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Project Details - Grounded Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto fade-in">
+    <div id="project-header" class="glass-card p-8 mb-8 animate__animated animate__fadeIn">
+        <div class="flex items-center gap-2 mb-4">
+            <a href="{{ url_for('projects') }}" class="flex items-center text-primary-400 hover:text-primary-300 transition-all duration-300">
+                <i class='bx bx-arrow-back mr-1'></i> Back to Projects
+            </a>
+        </div>
+        
+        <div id="project-loading" class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-400"></div>
+            <p class="text-gray-200 ml-4">Loading project details...</p>
+        </div>
+        
+        <div id="project-details" class="hidden">
+            <!-- Project details will be loaded here -->
+        </div>
+    </div>
+    
+    <div class="glass-card p-8 animate__animated animate__fadeIn animate__delay-1s">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <i class='bx bx-history text-primary-400 text-2xl'></i>
+                <h2 class="text-2xl font-bold text-white">Project Logs</h2>
+            </div>
+            <a id="create-log-btn" href="#" class="btn-primary px-6 py-2 text-white rounded-lg font-semibold flex items-center gap-2 shadow-lg">
+                <i class='bx bx-plus'></i> Add Dev Log
+            </a>
+        </div>
+        <div id="logs-container" class="space-y-6">
+            <div class="flex justify-center items-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-400"></div>
+                <p class="text-gray-200 ml-4">Loading project logs...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const pathParts = window.location.pathname.split('/');
+const projectId = pathParts[pathParts.length - 1];
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    if (isNaN(date)) return '';
+    
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    
+    if (diffDay > 0) {
+        return diffDay === 1 ? 'Yesterday' : `${diffDay} days ago`;
+    } else if (diffHour > 0) {
+        return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`;
+    } else if (diffMin > 0) {
+        return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
+
+function getTagColor(tag) {
+    const colors = {
+        'CAD': 'bg-blue-500',
+        'PCB': 'bg-purple-500',
+        'Hardware': 'bg-orange-500',
+        'Software': 'bg-emerald-500',
+        '3D Printing': 'bg-pink-500',
+        'Research': 'bg-indigo-500'
+    };
+    
+    return colors[tag] || 'bg-primary-500';
+}
+
+fetch(`/api/projects/${projectId}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch project');
+        }
+        return response.json();
+    })
+    .then(project => {
+        const projectDetails = document.getElementById('project-details');
+        const tagColor = getTagColor(project.fields['Project Tag']);
+        const createdDate = project.fields['Created At'] ? formatDate(project.fields['Created At']) : '';
+        const coverImage = project.fields['Cover Image URL'] || 'https://images.unsplash.com/photo-1581472723648-909f4851d4ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';
+        
+        document.title = `${project.fields['Project Name']} - Grounded Tracker`;
+        
+        console.log("Project data:", project);
+        console.log("Project fields:", project.fields);
+        console.log("Project Tag:", project.fields['Project Tag']);
+        console.log("Project Tag type:", typeof project.fields['Project Tag']);
+        
+        const projectName = project.fields['Project Name'] || '';
+        const projectTag = project.fields['Project Tag'] || '';
+        document.getElementById('create-log-btn').href = `{{ url_for('create_log') }}?project=${encodeURIComponent(projectName)}&project_tag=${encodeURIComponent(projectTag)}`;
+        
+        projectDetails.innerHTML = `
+            <div class="relative rounded-xl overflow-hidden mb-6 h-64">
+                <img src="${coverImage}" class="w-full h-full object-cover" alt="${project.fields['Project Name']}">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-70"></div>
+                <div class="absolute bottom-0 left-0 p-6 w-full">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium">${project.fields['Project Tag']}</span>
+                        <span class="text-gray-300 text-sm">${createdDate}</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-white">${project.fields['Project Name']}</h1>
+                </div>
+            </div>
+            
+            <div class="bg-slate-800 bg-opacity-50 p-6 rounded-lg">
+                <h3 class="text-primary-300 font-medium mb-3">Description</h3>
+                <p class="text-white">${project.fields['Description'] || 'No description provided.'}</p>
+            </div>
+            
+            <div class="flex justify-end mt-4 gap-3">
+                <a href="/edit-project?id=${project.id}" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 text-white rounded-lg flex items-center gap-2 transition-all duration-300">
+                    <i class='bx bx-edit'></i> Edit Project
+                </a>
+            </div>
+        `;
+        
+        document.getElementById('project-loading').classList.add('hidden');
+        projectDetails.classList.remove('hidden');
+    })
+    .catch(error => {
+        console.error('Error loading project:', error);
+        document.getElementById('project-loading').innerHTML = `
+            <div class="text-center py-6 w-full">
+                <i class='bx bx-error-circle text-4xl text-red-400 mb-3'></i>
+                <p class="text-red-300 text-lg">Error loading project details.</p>
+                <a href="{{ url_for('projects') }}" class="bg-slate-700 hover:bg-slate-600 mt-4 px-6 py-2 text-white rounded-lg font-semibold inline-flex items-center">
+                    <i class='bx bx-arrow-back mr-2'></i> Back to Projects
+                </a>
+            </div>
+        `;
+    });
+
+fetch(`/api/projects/${projectId}/logs`)
+    .then(response => response.json())
+    .then(logs => {
+        const container = document.getElementById('logs-container');
+        if (logs.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-10 animate__animated animate__fadeIn">
+                    <i class='bx bx-notepad text-5xl text-gray-400 mb-4'></i>
+                    <p class="text-gray-300 text-lg">No dev logs yet for this project.</p>
+                    <a href="{{ url_for('create_log') }}" id="empty-create-log-btn" class="btn-primary inline-block mt-4 px-6 py-2 text-white rounded-lg font-semibold">
+                        <i class='bx bx-plus mr-1'></i> Create Dev Log
+                    </a>
+                </div>
+            `;
+            
+            fetch(`/api/projects/${projectId}`)
+                .then(response => response.json())
+                .then(project => {
+                    const projectName = project.fields['Project Name'] || '';
+                    const projectTag = project.fields['Project Tag'] || '';
+                    document.getElementById('empty-create-log-btn').href = `{{ url_for('create_log') }}?project=${encodeURIComponent(projectName)}&project_tag=${encodeURIComponent(projectTag)}`;
+                });
+            return;
+        }
+        
+        container.innerHTML = logs.map((log, index) => {
+            const tagColor = getTagColor(log.fields['Project Tag']);
+            const createdDate = log.fields['Created At'] ? formatDate(log.fields['Created At']) : '';
+            const animationDelay = index < 5 ? `animate__delay-${index+1}s` : '';
+            
+            return `
+            <div class="glass-card p-6 rounded-lg hover:shadow-xl transition-all duration-300 animate__animated animate__fadeIn ${animationDelay}">
+                <div class="flex flex-col md:flex-row justify-between items-start mb-4 gap-3">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium">${log.fields['Project Tag']}</span>
+                            <span class="text-gray-400 text-sm">${createdDate}</span>
+                        </div>
+                        <h3 class="text-white text-xl font-semibold">${log.fields['Description']}</h3>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center bg-slate-800 px-3 py-1 rounded-full">
+                            <i class='bx bx-time text-primary-400 mr-1'></i>
+                            <span class="text-gray-200 text-sm">${log.fields['Time Spent (minutes)']} minutes</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="/edit-log?id=${log.id}" class="text-blue-400 hover:text-blue-300 bg-slate-800 p-2 rounded-full transition-all duration-300 hover:bg-slate-700">
+                                <i class='bx bx-edit text-lg'></i>
+                            </a>
+                            <button onclick="deleteLog('${log.id}')" class="text-red-400 hover:text-red-300 bg-slate-800 p-2 rounded-full transition-all duration-300 hover:bg-slate-700">
+                                <i class='bx bx-trash text-lg'></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 bg-opacity-50 p-4 rounded-lg mb-4">
+                    <h4 class="text-primary-300 font-medium mb-2">What I Did</h4>
+                    <p class="text-white">${log.fields['What I Did']}</p>
+                </div>
+                
+                ${log.fields['Media URL'] ? `
+                <div class="mt-4">
+                    ${(() => {
+                        const url = log.fields['Media URL'];
+                        const fileExt = url.split('.').pop().toLowerCase();
+                        
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+                            return `<img src="${url}" class="rounded-lg max-h-96 object-contain" alt="Log media">`;
+                        } else if (['mp4', 'webm', 'ogg'].includes(fileExt)) {
+                            return `<video controls class="rounded-lg max-h-96 w-full"><source src="${url}" type="video/${fileExt}">Your browser does not support the video tag.</video>`;
+                        } else {
+                            return `<a href="${url}" target="_blank" class="text-primary-400 hover:text-primary-300 flex items-center gap-2">
+                                <i class='bx bx-file'></i> View attached file
+                            </a>`;
+                        }
+                    })()} 
+                </div>` : ''}
+            </div>
+        `;
+    });

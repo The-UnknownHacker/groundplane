@@ -25,12 +25,12 @@
             </label>
             <select name="project_tag" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300">
               <option value="">Select a tag...</option>
-              <option value="CAD">CAD</option>
-              <option value="PCB">PCB</option>
-              <option value="Hardware">Hardware</option>
-              <option value="Software">Software</option>
-              <option value="3D Printing">3D Printing</option>
-              <option value="Research">Research</option>
+              <option value="CAD" {% if project_tag == 'CAD' %}selected{% endif %}>CAD</option>
+              <option value="PCB" {% if project_tag == 'PCB' %}selected{% endif %}>PCB</option>
+              <option value="Hardware" {% if project_tag == 'Hardware' %}selected{% endif %}>Hardware</option>
+              <option value="Software" {% if project_tag == 'Software' %}selected{% endif %}>Software</option>
+              <option value="3D Printing" {% if project_tag == '3D Printing' %}selected{% endif %}>3D Printing</option>
+              <option value="Research" {% if project_tag == 'Research' %}selected{% endif %}>Research</option>
             </select>
           </div>
 
@@ -38,7 +38,7 @@
             <label class="flex items-center text-primary-300 font-semibold mb-3">
               <i class='bx bx-rename mr-2'></i> Project Name
             </label>
-            <input type="text" name="project_name" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Project Name">
+            <input type="text" name="project_name" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Project Name" value="{{ project_name }}">
           </div>
         </div>
 
@@ -113,3 +113,10 @@
   </div>
 </div>
 {% endblock %}
+
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('project')) {
+    const projectName = urlParams.get('project');
+    document.getElementById('project_name').value = projectName;
+}
