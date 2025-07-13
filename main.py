@@ -12,6 +12,7 @@ import tempfile
 import uuid
 import threading
 import shutil
+from functions.allowed_file import allowed_file
 
 
 app = Flask(__name__)
@@ -34,8 +35,7 @@ temp_files = {}
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def login_required(f):
     @wraps(f)
@@ -201,12 +201,10 @@ def save_to_airtable(log_data):
                 'User ID': log_data['user_id'],
                 'User Name': log_data['user_name'],
                 'Project Name': log_data['project_name'],
-                'Project Tag': log_data['project_tag'],
+                'Project Tag': log_data.get('project_tag', ''),
                 'Description': log_data['description'],
-                'What I Did': log_data['what_did'],
-                'Could Have Done Better': log_data['could_improve'],
-                'What I Can Improve': log_data['can_improve'],
-                'Next Steps': log_data['next_steps'],
+                'What I Did': log_data.get('what_did', ''),
+                'Next Steps': log_data.get('next_steps', ''),
                 'Time Spent (minutes)': log_data['time_spent'],
                 'Media URL': log_data.get('media_url', ''),
                 'Created At': log_data['created_at']
@@ -330,11 +328,8 @@ def update_log(record_id):
         
         fields = {
             'Project Name': update_data.get('project_name'),
-            'Project Tag': update_data.get('project_tag'),
             'Description': update_data.get('description'),
-            'What I Did': update_data.get('what_did'),
-            'Could Have Done Better': update_data.get('could_improve'),
-            'What I Can Improve': update_data.get('can_improve'),
+            'Issues Faced': update_data.get('issues_faced'),
             'Next Steps': update_data.get('next_steps'),
             'Time Spent (minutes)': update_data.get('time_spent')
         }
@@ -370,16 +365,18 @@ def save_project_to_airtable(project_data):
             'Content-Type': 'application/json'
         }
         
-        if project_data['project_tag'] == 'undefined' or not project_data['project_tag']:
-            project_data['project_tag'] = 'Other' 
+        # Ensure cover_image_url is a full URL
+        cover_image_url = project_data.get('cover_image_url')
+        if cover_image_url and cover_image_url.startswith('/'):
+            cover_image_url = request.url_root.rstrip('/') + cover_image_url
         
         data = {
             'fields': {
                 'User ID': project_data['user_id'],
                 'User Name': project_data['user_name'],
                 'Project Name': project_data['project_name'],
-                'Project Tag': project_data['project_tag'],
                 'Description': project_data['description'],
+                'Cover Image URL': cover_image_url,
                 'Created At': project_data['created_at']
             }
         }
@@ -433,9 +430,7 @@ def create_project():
             'user_id': session['user_id'],
             'user_name': session['user_name'],
             'project_name': data.get('project_name'),
-            'project_tag': data.get('project_tag'),
             'description': data.get('description'),
-            'status': data.get('status', 'Active'),
             'created_at': datetime.now().isoformat()
         }
         
@@ -499,7 +494,6 @@ def update_project(record_id):
         
         fields = {
             'Project Name': update_data.get('project_name'),
-            'Project Tag': update_data.get('project_tag'),
             'Description': update_data.get('description'),
             'Cover Image URL': update_data.get('cover_image_url')
         }
@@ -559,17 +553,46 @@ def create_project_page():
     if request.method == 'POST':
         try:
             project_name = request.form.get('project_name')
-            project_tag = request.form.get('project_tag')
             description = request.form.get('description')
-            status = request.form.get('status', 'Active')
+            
+            # Default cover image path with full URL
+            cover_image_url = request.url_root.rstrip('/') + '/default_cover.png'
+            
+            # Check if a cover image was uploaded
+            if 'cover_image' in request.files:
+                file = request.files['cover_image']
+                if file and file.filename and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    timestamp = str(int(time.time()))
+                    filename = f"{timestamp}_{filename}"
+                    logger.info(f"Cover image URL being saved to Airtable: {cover_image_url}")
+
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1]) as temp_file:
+                        file.save(temp_file.name)
+                        temp_file_path = temp_file.name
+                    
+                    try:
+                        # Try to upload using the alternative method first
+                        media_url = upload_file_to_cdn_alternative(temp_file_path)
+                        
+                        if not media_url:
+                            media_url = upload_to_hackclub_cdn(temp_file_path)
+                        
+                        if media_url:
+                            cover_image_url = media_url
+                        else:
+                            flash('Failed to upload cover image. Using default image.', 'warning')
+                            
+                    finally:
+                        if os.path.exists(temp_file_path):
+                            os.remove(temp_file_path)
             
             project_data = {
                 'user_id': session['user_id'],
                 'user_name': session['user_name'],
                 'project_name': project_name,
-                'project_tag': project_tag,
                 'description': description,
-                'status': status,
+                'cover_image_url': cover_image_url,
                 'created_at': datetime.now().isoformat()
             }
             
@@ -759,6 +782,57 @@ def edit_log():
         
     return render_template('edit_log.html')
 
+@app.route('/api/projects/<project_id>/logs')
+@login_required
+def get_project_logs(project_id):
+    try:
+        logger.info(f"Fetching logs for project ID: {project_id}")
+        
+        # First, get the project to get its name
+        project_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{project_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        project_response = requests.get(project_url, headers=headers)
+        
+        if project_response.status_code != 200:
+            logger.error(f"Failed to fetch project: {project_response.text}")
+            return jsonify([])
+        
+        project_data = project_response.json()
+        project_name = project_data['fields']['Project Name']
+        logger.info(f"Project name: {project_name}")
+        
+        # Now get logs that match this project name
+        logs_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
+        
+        params = {
+            'filterByFormula': f"AND({{User ID}} = '{session['user_id']}', {{Project Name}} = '{project_name}', {{What I Did}} != '')",
+            'sort[0][field]': 'Created At',
+            'sort[0][direction]': 'desc'
+        }
+        
+        logger.info(f"Filter formula: {params['filterByFormula']}")
+        
+        logs_response = requests.get(logs_url, headers=headers, params=params)
+        
+        if logs_response.status_code == 200:
+            data = logs_response.json()
+            logger.info(f"Found {len(data['records'])} logs for project {project_name}")
+            return jsonify(data['records'])
+        else:
+            logger.error(f"Airtable logs fetch failed: {logs_response.text}")
+            return jsonify([])
+            
+    except Exception as e:
+        logger.error(f"Error fetching project logs: {str(e)}")
+        return jsonify([])
+
+@app.route('/default_cover.png')
+def serve_default_cover():
+    """Serve the default cover image"""
+    return send_file('default_cover.png')
+
+
 if __name__ == '__main__':
     
     print("\n" + "=" * 50)
@@ -775,7 +849,7 @@ if __name__ == '__main__':
         if os.path.exists(cert_file) and os.path.exists(key_file):
             context.load_cert_chain(cert_file, key_file)
             print("✓ SSL certificates found")
-            print(f"🚀 Starting HTTPS server at https://localhost:5000")
+            print(f"🚀 Starting HTTPS server at https://127.0.0.1:5000")
             app.run(debug=True, port=5000, ssl_context=context)
         else:
             print("⚠️  SSL certificates not found!")
@@ -789,3 +863,5 @@ if __name__ == '__main__':
         print(f"❌ SSL setup failed: {e}")
         print("🚀 Starting HTTP server at http://localhost:5000")
         app.run(debug=True, port=5000)
+        
+        

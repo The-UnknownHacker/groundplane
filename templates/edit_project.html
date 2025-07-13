@@ -18,26 +18,10 @@
     
     <div id="project-form" class="glass-card p-8 rounded-lg hidden">
         <form id="edit-project-form" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="project_name" class="block text-white font-medium mb-2">Project Name</label>
-                    <input type="text" id="project_name" name="project_name" required 
-                        class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
-                </div>
-                
-                <div>
-                    <label for="project_tag" class="block text-white font-medium mb-2">Project Tag</label>
-                    <select id="project_tag" name="project_tag" required 
-                        class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="">Select a tag</option>
-                        <option value="CAD">CAD</option>
-                        <option value="PCB">PCB</option>
-                        <option value="Software">Software</option>
-                        <option value="Hardware">Hardware</option>
-                        <option value="Research">Research</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
+            <div>
+                <label for="project_name" class="block text-white font-medium mb-2">Project Name</label>
+                <input type="text" id="project_name" name="project_name" required 
+                    class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
             </div>
             
             <div>
@@ -46,16 +30,7 @@
                     class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
             </div>
             
-            <div>
-                <label for="status" class="block text-white font-medium mb-2">Status</label>
-                <select id="status" name="status" required 
-                    class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
-                    <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Archived">Archived</option>
-                </select>
-            </div>
+        
             
             <div class="flex justify-end space-x-4">
                 <a href="{{ url_for('index') }}" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all duration-300">
@@ -85,9 +60,8 @@ fetch(`/api/projects/${recordId}`)
         document.getElementById('project-form').classList.remove('hidden');
         
         document.getElementById('project_name').value = data.fields['Project Name'] || '';
-        document.getElementById('project_tag').value = data.fields['Project Tag'] || '';
         document.getElementById('description').value = data.fields['Description'] || '';
-        document.getElementById('status').value = data.fields['Status'] || 'Active';
+        // Removed: document.getElementById('status').value = data.fields['Status'] || 'Active';
     })
     .catch(error => {
         console.error('Error:', error);
@@ -117,9 +91,8 @@ document.getElementById('edit-project-form').addEventListener('submit', function
     
     const projectData = {
         project_name: document.getElementById('project_name').value,
-        project_tag: document.getElementById('project_tag').value,
-        description: document.getElementById('description').value,
-        status: document.getElementById('status').value
+        description: document.getElementById('description').value
+        // Removed: status: document.getElementById('status').value
     };
     
     fetch(`/api/projects/${recordId}`, {

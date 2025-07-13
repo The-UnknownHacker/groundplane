@@ -26,28 +26,11 @@
 
       <form id="edit-form" method="POST" class="space-y-6 hidden animate__animated animate__fadeIn">
         <input type="hidden" id="record_id" name="record_id">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-            <label class="flex items-center text-primary-300 font-semibold mb-3">
-              <i class='bx bx-tag-alt mr-2'></i> Project Tag
-            </label>
-            <select id="project_tag" name="project_tag" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300">
-              <option value="">Select a tag...</option>
-              <option value="CAD">CAD</option>
-              <option value="PCB">PCB</option>
-              <option value="Hardware">Hardware</option>
-              <option value="Software">Software</option>
-              <option value="3D Printing">3D Printing</option>
-              <option value="Research">Research</option>
-            </select>
-          </div>
-
-          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-            <label class="flex items-center text-primary-300 font-semibold mb-3">
-              <i class='bx bx-rename mr-2'></i> Project Name
-            </label>
-            <input type="text" id="project_name" name="project_name" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Project Name">
-          </div>
+        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+          <label class="flex items-center text-primary-300 font-semibold mb-3">
+            <i class='bx bx-rename mr-2'></i> Project Name
+          </label>
+          <input type="text" id="project_name" name="project_name" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Project Name">
         </div>
 
         <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
@@ -57,26 +40,12 @@
           <input type="text" id="description" name="description" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Brief description of your work session">
         </div>
 
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-task mr-2'></i> What I Did
-          </label>
-          <textarea id="what_did" name="what_did" required rows="4" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Describe what you accomplished..."></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
             <label class="flex items-center text-primary-300 font-semibold mb-3">
-              <i class='bx bx-revision mr-2'></i> Could Have Done Better
+              <i class='bx bx-error-circle mr-2'></i> Issues Faced
             </label>
-            <textarea id="could_improve" name="could_improve" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Reflect on what could have been improved..."></textarea>
-          </div>
-
-          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-            <label class="flex items-center text-primary-300 font-semibold mb-3">
-              <i class='bx bx-trending-up mr-2'></i> What I Can Improve
-            </label>
-            <textarea id="can_improve" name="can_improve" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Areas for improvement..."></textarea>
+            <textarea id="issues_faced" name="issues_faced" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Any issues you faced..."></textarea>
           </div>
 
           <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
@@ -153,12 +122,9 @@
         return response.json();
       })
       .then(data => {
-        document.getElementById('project_tag').value = data.fields['Project Tag'];
         document.getElementById('project_name').value = data.fields['Project Name'];
         document.getElementById('description').value = data.fields['Description'];
-        document.getElementById('what_did').value = data.fields['What I Did'];
-        document.getElementById('could_improve').value = data.fields['Could Have Done Better'] || '';
-        document.getElementById('can_improve').value = data.fields['What I Can Improve'] || '';
+        document.getElementById('issues_faced').value = data.fields['Issues Faced'] || '';
         document.getElementById('next_steps').value = data.fields['Next Steps'] || '';
         document.getElementById('time_spent').value = data.fields['Time Spent (minutes)'];
         
@@ -196,12 +162,9 @@
       submitBtn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Updating...`;
       
       const formData = {
-        project_tag: document.getElementById('project_tag').value,
         project_name: document.getElementById('project_name').value,
         description: document.getElementById('description').value,
-        what_did: document.getElementById('what_did').value,
-        could_improve: document.getElementById('could_improve').value,
-        can_improve: document.getElementById('can_improve').value,
+        issues_faced: document.getElementById('issues_faced').value,
         next_steps: document.getElementById('next_steps').value,
         time_spent: parseInt(document.getElementById('time_spent').value)
       };
