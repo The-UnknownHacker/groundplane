@@ -12,8 +12,9 @@ import tempfile
 import uuid
 import threading
 import shutil
-from functions.allowed_file import allowed_file
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
@@ -202,7 +203,7 @@ def save_to_airtable(log_data):
                 'User Name': log_data['user_name'],
                 'Project Name': log_data['project_name'],
                 'Project Tag': log_data.get('project_tag', ''),
-                'Description': log_data['description'],
+                'Title': log_data.get('title', ''),
                 'What I Did': log_data.get('what_did', ''),
                 'Next Steps': log_data.get('next_steps', ''),
                 'Time Spent (minutes)': log_data['time_spent'],
@@ -328,7 +329,7 @@ def update_log(record_id):
         
         fields = {
             'Project Name': update_data.get('project_name'),
-            'Description': update_data.get('description'),
+            'Title': update_data.get('title'),
             'Issues Faced': update_data.get('issues_faced'),
             'Next Steps': update_data.get('next_steps'),
             'Time Spent (minutes)': update_data.get('time_spent')
@@ -709,7 +710,7 @@ def create_log():
         try:
             project_tag = request.form.get('project_tag')
             project_name = request.form.get('project_name')
-            description = request.form.get('description')
+            title = request.form.get('title')
             what_did = request.form.get('what_did')
             could_improve = request.form.get('could_improve')
             can_improve = request.form.get('can_improve')
@@ -746,7 +747,7 @@ def create_log():
                 'user_name': session['user_name'],
                 'project_name': project_name,
                 'project_tag': project_tag,
-                'description': description,
+                'title': title,
                 'what_did': what_did,
                 'could_improve': could_improve,
                 'can_improve': can_improve,
@@ -818,6 +819,9 @@ def get_project_logs(project_id):
         if logs_response.status_code == 200:
             data = logs_response.json()
             logger.info(f"Found {len(data['records'])} logs for project {project_name}")
+            
+            # The records already contain the Title field from Airtable
+            # No need to generate or modify titles - just return the data as-is
             return jsonify(data['records'])
         else:
             logger.error(f"Airtable logs fetch failed: {logs_response.text}")

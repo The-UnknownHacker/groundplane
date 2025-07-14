@@ -115,7 +115,7 @@ const pathParts = window.location.pathname.split('/');
 const projectId = pathParts[pathParts.length - 1];
 let allLogs = [];
 let filteredLogs = [];
-let sortOrder = 'desc'; // desc = newest first, asc = oldest first
+let sortOrder = 'desc';
 
 function formatDate(dateString) {
     const date = new Date(dateString);
@@ -169,19 +169,23 @@ function filterAndSortLogs() {
     const tagFilter = document.getElementById('tag-filter').value;
     
     filteredLogs = allLogs.filter(log => {
-        const matchesSearch = !searchTerm || 
-            log.fields['Description'].toLowerCase().includes(searchTerm) ||
-            log.fields['What I Did'].toLowerCase().includes(searchTerm);
+        const title = log.fields['Title'] || log.fields['title'] || '';
+        console.log("title is", title); // i hate this issue
+        const whatIDid = log.fields['What I Did'] || log.fields['what_did'] || '';
+        const projectTag = log.fields['Project Tag'] || log.fields['project_tag'] || '';
         
-        const matchesTag = !tagFilter || log.fields['Project Tag'] === tagFilter;
+        const matchesSearch = !searchTerm || 
+            title.toLowerCase().includes(searchTerm) ||
+            whatIDid.toLowerCase().includes(searchTerm);
+        
+        const matchesTag = !tagFilter || projectTag === tagFilter;
         
         return matchesSearch && matchesTag;
     });
     
-    // Sort logs
     filteredLogs.sort((a, b) => {
-        const dateA = new Date(a.fields['Created At']);
-        const dateB = new Date(b.fields['Created At']);
+        const dateA = new Date(a.fields['Created At'] || a.fields['created_at'] || '');
+        const dateB = new Date(b.fields['Created At'] || b.fields['created_at'] || '');
         return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
     
@@ -218,8 +222,16 @@ function renderLogs() {
     }
     
     container.innerHTML = filteredLogs.map((log, index) => {
-        const tagColor = getTagColor(log.fields['Project Tag']);
-        const createdDate = log.fields['Created At'] ? formatDate(log.fields['Created At']) : '';
+        // Add null/undefined checks for all fields - FIXED: Now properly extracting Title field
+        const title = log.fields['Title'] || log.fields['title'] || 'Untitled Log';
+        const projectTag = log.fields['Project Tag'] || log.fields['project_tag'] || 'General';
+        const whatIDid = log.fields['What I Did'] || log.fields['what_did'] || 'No description provided';
+        const timeSpent = log.fields['Time Spent (minutes)'] || log.fields['time_spent'] || '0';
+        const mediaURL = log.fields['Media URL'] || log.fields['media_url'] || '';
+        const createdAt = log.fields['Created At'] || log.fields['created_at'] || '';
+        
+        const tagColor = getTagColor(projectTag);
+        const createdDate = createdAt ? formatDate(createdAt) : '';
         const animationDelay = index < 5 ? `animate__delay-${index+1}s` : '';
         
         return `
@@ -227,18 +239,18 @@ function renderLogs() {
             <div class="flex flex-col md:flex-row justify-between items-start mb-4 gap-3">
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">${log.fields['Project Tag']}</span>
+                        <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">${projectTag}</span>
                         <span class="text-gray-400 text-sm flex items-center gap-1">
                             <i class='bx bx-time'></i>
                             ${createdDate}
                         </span>
                     </div>
-                    <h3 class="text-white text-xl font-semibold group-hover:text-primary-300 transition-colors duration-300">${log.fields['Description']}</h3>
+                    <h3 class="text-white text-xl font-semibold group-hover:text-primary-300 transition-colors duration-300">${title}</h3>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center bg-slate-800/70 px-4 py-2 rounded-full border border-slate-700">
                         <i class='bx bx-stopwatch text-primary-400 mr-2'></i>
-                        <span class="text-gray-200 text-sm font-medium">${log.fields['Time Spent (minutes)']} min</span>
+                        <span class="text-gray-200 text-sm font-medium">${timeSpent} min</span>
                     </div>
                     <div class="flex space-x-2">
                         <a href="/edit-log?id=${log.id}" class="text-blue-400 hover:text-blue-300 bg-slate-800/70 p-2 rounded-full transition-all duration-300 hover:bg-slate-700 hover:scale-110" title="Edit log">
@@ -256,10 +268,10 @@ function renderLogs() {
                     <i class='bx bx-code-block text-primary-400'></i>
                     <h4 class="text-primary-300 font-medium">What I Did</h4>
                 </div>
-                <p class="text-white leading-relaxed">${log.fields['What I Did']}</p>
+                <p class="text-white leading-relaxed">${whatIDid}</p>
             </div>
             
-            ${log.fields['Media URL'] ? `
+            ${mediaURL ? `
             <div class="mt-4">
                 <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
                     <div class="flex items-center gap-2 mb-3">
@@ -267,7 +279,7 @@ function renderLogs() {
                         <h4 class="text-primary-300 font-medium">Attached Media</h4>
                     </div>
                     ${(() => {
-                        const url = log.fields['Media URL'];
+                        const url = mediaURL;
                         const fileExt = url.split('.').pop().toLowerCase();
                         
                         if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
