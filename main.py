@@ -208,7 +208,9 @@ def save_to_airtable(log_data):
                 'Next Steps': log_data.get('next_steps', ''),
                 'Time Spent (minutes)': log_data['time_spent'],
                 'Media URL': log_data.get('media_url', ''),
-                'Created At': log_data['created_at']
+                'Created At': log_data['created_at'],
+                'Issues Faced': log_data.get('issues_faced', ''),
+                'Status': log_data.get('status', 'Pending')  # Default to 'Pending' if not provided
             }
         }
         
@@ -332,7 +334,8 @@ def update_log(record_id):
             'Title': update_data.get('title'),
             'Issues Faced': update_data.get('issues_faced'),
             'Next Steps': update_data.get('next_steps'),
-            'Time Spent (minutes)': update_data.get('time_spent')
+            'Time Spent (minutes)': update_data.get('time_spent'),
+            'Status': update_data.get('status')  # Allow updating the status
         }
         
         fields = {k: v for k, v in fields.items() if v is not None}
@@ -366,7 +369,6 @@ def save_project_to_airtable(project_data):
             'Content-Type': 'application/json'
         }
         
-        # Ensure cover_image_url is a full URL
         cover_image_url = project_data.get('cover_image_url')
         if cover_image_url and cover_image_url.startswith('/'):
             cover_image_url = request.url_root.rstrip('/') + cover_image_url
@@ -556,10 +558,8 @@ def create_project_page():
             project_name = request.form.get('project_name')
             description = request.form.get('description')
             
-            # Default cover image path with full URL
             cover_image_url = request.url_root.rstrip('/') + '/default_cover.png'
             
-            # Check if a cover image was uploaded
             if 'cover_image' in request.files:
                 file = request.files['cover_image']
                 if file and file.filename and allowed_file(file.filename):
@@ -573,7 +573,6 @@ def create_project_page():
                         temp_file_path = temp_file.name
                     
                     try:
-                        # Try to upload using the alternative method first
                         media_url = upload_file_to_cdn_alternative(temp_file_path)
                         
                         if not media_url:
@@ -628,16 +627,11 @@ def project_detail(project_id):
     """Render the project detail page"""
     return render_template('project_detail.html', project_id=project_id)
 
-@app.route('/projects')
-@login_required
-def projects():
-    """Render the projects dashboard"""
-    return render_template('projects.html', user=session)
 
 @app.route('/')
 def index():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return render_template('landing.html')
     return render_template('dashboard.html', user=session)
 
 @app.route('/login')
@@ -754,7 +748,8 @@ def create_log():
                 'next_steps': next_steps,
                 'time_spent': time_spent,
                 'media_url': media_url,
-                'created_at': datetime.now().isoformat()
+                'created_at': datetime.now().isoformat(),
+                'status': 'Pending'  # Set default status to Pending
             }
             
             # Save to Airtable :sob
@@ -789,7 +784,6 @@ def get_project_logs(project_id):
     try:
         logger.info(f"Fetching logs for project ID: {project_id}")
         
-        # First, get the project to get its name
         project_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{project_id}"
         headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
         
@@ -803,7 +797,6 @@ def get_project_logs(project_id):
         project_name = project_data['fields']['Project Name']
         logger.info(f"Project name: {project_name}")
         
-        # Now get logs that match this project name
         logs_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
         
         params = {
@@ -820,8 +813,6 @@ def get_project_logs(project_id):
             data = logs_response.json()
             logger.info(f"Found {len(data['records'])} logs for project {project_name}")
             
-            # The records already contain the Title field from Airtable
-            # No need to generate or modify titles - just return the data as-is
             return jsonify(data['records'])
         else:
             logger.error(f"Airtable logs fetch failed: {logs_response.text}")
