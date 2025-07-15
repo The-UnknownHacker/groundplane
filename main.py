@@ -210,7 +210,7 @@ def save_to_airtable(log_data):
                 'Media URL': log_data.get('media_url', ''),
                 'Created At': log_data['created_at'],
                 'Issues Faced': log_data.get('issues_faced', ''),
-                'Status': log_data.get('status', 'Pending')  # Default to 'Pending' if not provided
+                'Status': log_data.get('status', 'Pending')  
             }
         }
         
@@ -335,7 +335,7 @@ def update_log(record_id):
             'Issues Faced': update_data.get('issues_faced'),
             'Next Steps': update_data.get('next_steps'),
             'Time Spent (minutes)': update_data.get('time_spent'),
-            'Status': update_data.get('status')  # Allow updating the status
+            'Status': update_data.get('status')  
         }
         
         fields = {k: v for k, v in fields.items() if v is not None}
@@ -711,7 +711,7 @@ def create_log():
             project_name = request.form.get('project_name')
             title = request.form.get('title')
             what_did = request.form.get('what_did')
-            issues_faced = request.form.get('issues_faced')  # ADD THIS LINE
+            issues_faced = request.form.get('issues_faced')  # ADD THIS LINE I DIED TRYING TO TROUBLESHOOT THIS
             next_steps = request.form.get('next_steps')
             time_spent = int(request.form.get('time_spent', 0))
             
@@ -752,7 +752,7 @@ def create_log():
                 'time_spent': time_spent,
                 'media_url': media_url,
                 'created_at': datetime.now().isoformat(),
-                'status': 'Pending'  # Set default status to Pending
+                'status': 'Pending'  # Set default status to Pending cause project pending
             }
             
             # Save to Airtable :sob

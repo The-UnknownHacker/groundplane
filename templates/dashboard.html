@@ -392,7 +392,6 @@ function formatDate(dateString) {
     }
 }
 
-// Replace the existing renderProjects function with this updated version
 function renderProjects(projects) {
     const container = document.getElementById('projects-container');
     
@@ -420,7 +419,7 @@ function renderProjects(projects) {
             const createdDate = project.fields['Created At'] ? formatDate(project.fields['Created At']) : '';
             const animationDelay = index < 6 ? `animate__delay-${index % 3 + 1}s` : '';
             const coverImage = project.fields['Cover Image URL'] || '/default_cover.png';
-            const githubLink = project.fields['github_link'] || 
+            const githubLink = project.fields['github_link'] || // IDK what im doing its 3 am 😭
                              project.fields['GitHub Link'] || 
                              project.fields['Github Link'] || 
                              project.fields['github_url'] || 

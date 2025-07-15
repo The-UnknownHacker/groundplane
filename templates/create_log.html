@@ -307,7 +307,6 @@
     </div>
 
     <script>
-        // URL parameter handling
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('project')) {
             const projectName = urlParams.get('project');
@@ -329,7 +328,6 @@
             });
         }
 
-        // Enhanced file input handling
         document.addEventListener('DOMContentLoaded', function() {
             const fileInput = document.getElementById('file-upload');
             const fileLabel = document.querySelector('label[for="file-upload"]');
@@ -342,24 +340,19 @@
                     const file = event.target.files[0];
                     
                     if (file) {
-                        // Update label text and style
                         fileLabelText.textContent = file.name;
                         fileLabel.classList.add('file-selected');
                         
-                        // Update icon
                         const icon = fileLabel.querySelector('i');
                         if (icon) {
                             icon.className = 'bx bx-check text-xl';
                         }
                         
-                        // Show success message
                         successMessage.style.display = 'flex';
                         successMessage.querySelector('span').textContent = `File "${file.name}" uploaded successfully!`;
                         
-                        // Create and show preview
                         createPreview(file, previewContainer);
                         
-                        // Add some visual feedback
                         fileLabel.style.transform = 'scale(1.02)';
                         setTimeout(() => {
                             fileLabel.style.transform = 'scale(1)';
@@ -367,12 +360,10 @@
                         
                         console.log('File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
                     } else {
-                        // Reset if no file selected
                         resetFileInput();
                     }
                 });
                 
-                // Handle drag and drop
                 fileLabel.addEventListener('dragover', function(e) {
                     e.preventDefault();
                     fileLabel.style.background = 'linear-gradient(45deg, #33d6a6, #5bc0de)';
@@ -399,7 +390,7 @@
             }
             
             function createPreview(file, container) {
-                container.innerHTML = ''; // Clear previous preview
+                container.innerHTML = '';
                 container.style.display = 'flex';
                 
                 if (file.type.startsWith('image/')) {
@@ -430,7 +421,6 @@
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    // Show file info for other types
                     const fileInfo = document.createElement('div');
                     fileInfo.style.color = 'white';
                     fileInfo.style.textAlign = 'center';
@@ -464,31 +454,7 @@
                 const i = Math.floor(Math.log(bytes) / Math.log(k));
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
-            
-            // Form submission handling - commented out for Flask integration
-            /*
-            document.getElementById('devLogForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const submitBtn = document.querySelector('button[type="submit"]');
-                const originalContent = submitBtn.innerHTML;
-                
-                submitBtn.innerHTML = '<i class="bx bx-loader-alt animate-spin text-xl"></i> Creating...';
-                submitBtn.disabled = true;
-                
-                // Simulate form submission
-                setTimeout(() => {
-                    submitBtn.innerHTML = '<i class="bx bx-check text-xl"></i> Created!';
-                    submitBtn.style.background = 'linear-gradient(45deg, #33d6a6, #5bc0de)';
-                    
-                    setTimeout(() => {
-                        submitBtn.innerHTML = originalContent;
-                        submitBtn.disabled = false;
-                        submitBtn.style.background = 'linear-gradient(45deg, #ff8c37, #ec3750, #a633d6)';
-                    }, 2000);
-                }, 1500);
-            });
-            */
+          
         });
     </script>
 {% endblock %}

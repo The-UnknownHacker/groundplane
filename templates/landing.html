@@ -37,7 +37,6 @@
 
     <!-- Styles -->
     <style>
-        /* Hack Club Phantom Sans Font */
         @font-face {
             font-family: 'Phantom Sans';
             src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff') format('woff'),
@@ -55,7 +54,6 @@
             font-display: swap;
         }
         
-        /* Hack Club Colors */
         :root {
             --red: #ec3750;
             --orange: #ff8c37;
@@ -66,7 +64,6 @@
             --purple: #a633d6;
         }
         
-        /* Base Styles */
         body {
             font-family: 'Phantom Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             scroll-behavior: smooth;
@@ -77,7 +74,6 @@
             overflow-x: hidden;
         }
         
-        /* Floating background elements */
         .bg-floaty {
             position: fixed;
             pointer-events: none;
@@ -107,7 +103,6 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
         
-        /* Hack Club Specific Styles - more playful */
         .hack-gradient {
             background: linear-gradient(45deg, var(--orange), var(--red), var(--purple));
             background-size: 200% 200%;
@@ -202,7 +197,6 @@
             animation: gradient-shift 3s ease infinite;
         }
         
-        /* Handwritten style elements */
         .handwritten {
             font-family: 'Comic Sans MS', cursive, 'Phantom Sans';
             transform: rotate(-2deg);
@@ -214,7 +208,6 @@
             text-decoration-color: var(--yellow);
         }
         
-        /* Custom scrollbar - more fun */
         ::-webkit-scrollbar {
             width: 12px;
         }
@@ -234,12 +227,10 @@
             background: linear-gradient(45deg, var(--red), var(--purple));
         }
         
-        /* Emoji cursor */
         .cursor-emoji {
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><text y="20" font-size="20">👾</text></svg>'), auto;
         }
         
-        /* Fade-in animation for content */
         .fade-in {
             animation: fadeIn 0.6s ease-in-out;
         }
@@ -249,7 +240,6 @@
             to { opacity: 1; transform: translateY(0) rotate(0deg); }
         }
         
-        /* Glitch effect for title */
         .glitch {
             position: relative;
             animation: glitch 2s infinite;
@@ -442,16 +432,13 @@
     </div>
 
     <script>
-        // Add some interactive elements
         document.addEventListener('DOMContentLoaded', function() {
-            // Make cards randomly tilt slightly on load
             const cards = document.querySelectorAll('.hack-card');
             cards.forEach(card => {
-                const randomTilt = (Math.random() - 0.5) * 2; // Random tilt between -1 and 1 degree
+                const randomTilt = (Math.random() - 0.5) * 2; 
                 card.style.transform = `rotate(${randomTilt}deg)`;
             });
             
-            // Add click effect to buttons
             const buttons = document.querySelectorAll('.hack-btn, .hack-btn-secondary');
             buttons.forEach(button => {
                 button.addEventListener('click', function() {
