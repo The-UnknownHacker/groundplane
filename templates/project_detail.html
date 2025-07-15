@@ -12,7 +12,7 @@
         <div class="relative z-10">
             <div class="flex items-center gap-2 mb-6">
                 <nav class="flex items-center space-x-2 text-sm">
-                    <a href="{{ url_for('projects') }}" class="flex items-center text-primary-400 hover:text-primary-300 transition-all duration-300 hover:scale-105">
+                    <a href="{{ url_for('index') }}" class="flex items-center text-primary-400 hover:text-primary-300 transition-all duration-300 hover:scale-105">
                         <i class='bx bx-home mr-1'></i>
                         <span>Projects</span>
                     </a>
@@ -388,7 +388,7 @@ fetch(`/api/projects/${projectId}`)
                 <i class='bx bx-error-circle text-6xl text-red-400 mb-4'></i>
                 <h3 class="text-xl font-semibold text-red-300 mb-2">Failed to Load Project</h3>
                 <p class="text-gray-400 mb-6">There was an error loading the project details.</p>
-                <a href="{{ url_for('projects') }}" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 text-white rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 transition-all duration-300">
+                <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 text-white rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 transition-all duration-300">
                     <i class='bx bx-arrow-back'></i> Back to Projects
                 </a>
             </div>

@@ -379,6 +379,7 @@ def save_project_to_airtable(project_data):
                 'User Name': project_data['user_name'],
                 'Project Name': project_data['project_name'],
                 'Description': project_data['description'],
+                'Github Link': project_data['github_link'],
                 'Cover Image URL': cover_image_url,
                 'Created At': project_data['created_at']
             }
@@ -434,6 +435,7 @@ def create_project():
             'user_name': session['user_name'],
             'project_name': data.get('project_name'),
             'description': data.get('description'),
+            'github_link': data.get('github_link'),
             'created_at': datetime.now().isoformat()
         }
         
@@ -498,6 +500,7 @@ def update_project(record_id):
         fields = {
             'Project Name': update_data.get('project_name'),
             'Description': update_data.get('description'),
+            'Github Link': update_data.get('github_link'),
             'Cover Image URL': update_data.get('cover_image_url')
         }
         
@@ -557,6 +560,7 @@ def create_project_page():
         try:
             project_name = request.form.get('project_name')
             description = request.form.get('description')
+            github_link = request.form.get('github_link')
             
             cover_image_url = request.url_root.rstrip('/') + '/default_cover.png'
             
@@ -592,6 +596,7 @@ def create_project_page():
                 'user_name': session['user_name'],
                 'project_name': project_name,
                 'description': description,
+                'github_link': github_link,
                 'cover_image_url': cover_image_url,
                 'created_at': datetime.now().isoformat()
             }

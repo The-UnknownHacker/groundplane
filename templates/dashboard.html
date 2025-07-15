@@ -284,6 +284,8 @@ function renderProjects(projects) {
             const createdDate = project.fields['Created At'] ? formatDate(project.fields['Created At']) : '';
             const animationDelay = index < 6 ? `animate__delay-${index % 3 + 1}s` : '';
             const coverImage = project.fields['Cover Image URL'] || '/default_cover.png';
+            const githubLink = project.fields['github_link']; 
+
             
             return `
             <div class="glass-card overflow-hidden rounded-xl hover:shadow-2xl transition-all duration-500 animate__animated animate__fadeIn ${animationDelay} flex flex-col h-full transform hover:scale-105 group">
@@ -301,6 +303,14 @@ function renderProjects(projects) {
                 
                 <div class="p-6 flex-grow">
                     <p class="text-gray-300 line-clamp-3 h-18 overflow-hidden leading-relaxed">${project.fields['Description'] || 'No description provided.'}</p>
+                    ${githubLink ? `
+                        <div class="mt-4 flex items-center gap-2 text-sm">
+                            <i class='bx bxl-github text-primary-400'></i>
+                            <a href="${githubLink}" target="_blank" class="text-primary-400 hover:text-primary-300 transition-colors duration-300">
+                                GitHub
+                            </a>
+                        </div>
+                    ` : ''}
                 </div>
                 
                 <div class="p-6 pt-0 flex justify-between items-center">
@@ -308,6 +318,11 @@ function renderProjects(projects) {
                         <i class='bx bx-folder-open'></i> View Project
                     </a>
                     <div class="flex space-x-2">
+                        ${githubLink ? `
+                            <a href="${githubLink}" target="_blank" class="text-gray-400 hover:text-gray-300 bg-slate-800 hover:bg-slate-700 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg" title="View on GitHub">
+                                <i class='bx bxl-github text-lg'></i>
+                            </a>
+                        ` : ''}
                         <a href="/edit-project?id=${project.id}" class="text-gray-400 hover:text-gray-300 bg-slate-800 hover:bg-slate-700 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg">
                             <i class='bx bx-edit text-lg'></i>
                         </a>
@@ -325,6 +340,8 @@ function renderProjects(projects) {
             const tagColor = getTagColor(projectTag);
             const createdDate = project.fields['Created At'] ? formatDate(project.fields['Created At']) : '';
             const coverImage = project.fields['Cover Image URL'] || '/default_cover.png';
+            const githubLink = project.fields['github_link']; 
+                             
             
             return `
             <div class="glass-card p-6 rounded-xl hover:shadow-2xl transition-all duration-500 animate__animated animate__fadeIn flex items-center gap-6 transform hover:scale-102 group">
@@ -338,6 +355,14 @@ function renderProjects(projects) {
                         ${projectTag ? `<span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium">${projectTag}</span>` : ''}
                     </div>
                     <p class="text-gray-300 line-clamp-2 mb-2">${project.fields['Description'] || 'No description provided.'}</p>
+                    ${githubLink ? `
+                        <div class="flex items-center gap-2 text-sm mb-2">
+                            <i class='bx bxl-github text-primary-400'></i>
+                            <a href="${githubLink}" target="_blank" class="text-primary-400 hover:text-primary-300 transition-colors duration-300">
+                                GitHub
+                            </a>
+                        </div>
+                    ` : ''}
                     <p class="text-gray-400 text-sm">${createdDate}</p>
                 </div>
                 
@@ -345,6 +370,11 @@ function renderProjects(projects) {
                     <a href="/project/${project.id}" class="btn-primary px-4 py-2 text-white rounded-lg text-sm font-medium flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-300">
                         <i class='bx bx-folder-open'></i> View
                     </a>
+                    ${githubLink ? `
+                        <a href="${githubLink}" target="_blank" class="text-gray-400 hover:text-gray-300 bg-slate-800 hover:bg-slate-700 p-2 rounded-full transition-all duration-300" title="View on GitHub">
+                            <i class='bx bxl-github text-lg'></i>
+                        </a>
+                    ` : ''}
                     <a href="/edit-project?id=${project.id}" class="text-gray-400 hover:text-gray-300 bg-slate-800 hover:bg-slate-700 p-2 rounded-full transition-all duration-300">
                         <i class='bx bx-edit text-lg'></i>
                     </a>
