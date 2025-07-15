@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Project Details - Grounded Tracker{% endblock %}
+{% block title %}Project Details -  Groundplane{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto fade-in">
@@ -342,7 +342,7 @@ fetch(`/api/projects/${projectId}`)
         const createdDate = project.fields['Created At'] ? formatDate(project.fields['Created At']) : '';
         const coverImage = project.fields['Cover Image URL'] || '/default_cover.png';
         
-        document.title = `${project.fields['Project Name']} - Grounded Tracker`;
+        document.title = `${project.fields['Project Name']} - Groundplane`;
         
         const projectName = project.fields['Project Name'] || '';
         const projectTag = project.fields['Project Tag'] || '';

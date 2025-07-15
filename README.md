@@ -1,4 +1,4 @@
-# Grounded Tracker
+# Groundplane
 
 This is a web application built with Flask that allows users to track projects and logs. It integrates with Airtable for data storage and uses HTML templates for the user interface.
 
