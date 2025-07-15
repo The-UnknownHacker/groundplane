@@ -3,102 +3,248 @@
 {% block title %}Create Dev Log - Grounded Tracker{% endblock %}
 
 {% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    .handwritten {
+        font-family: 'Comic Sans MS', cursive;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+    
+    .glass-input {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .glass-input:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 140, 55, 0.5);
+        box-shadow: 0 0 20px rgba(255, 140, 55, 0.3);
+        transform: scale(1.02);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(45deg, #ff8c37, #ec3750, #a633d6);
+        background-size: 200% 200%;
+        animation: gradientPulse 3s ease infinite;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: scale(1.05) rotate(1deg);
+        box-shadow: 0 10px 30px rgba(255, 140, 55, 0.4);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #33d6a6, #5bc0de);
+        background-size: 200% 200%;
+        animation: gradientPulse 3s ease infinite reverse;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        transform: scale(1.05) rotate(-1deg);
+        box-shadow: 0 10px 30px rgba(51, 214, 166, 0.4);
+    }
+    
+    @keyframes gradientPulse {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .field-container {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .field-container:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 140, 55, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .icon-glow {
+        filter: drop-shadow(0 0 8px rgba(255, 140, 55, 0.6));
+    }
+    
+    .label-gradient {
+        background: linear-gradient(45deg, #ff8c37, #f1c40f, #33d6a6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .select-arrow {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff8c37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 20px;
+    }
+    
+    .file-input {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .file-input input[type="file"] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-label {
+        background: linear-gradient(45deg, #a633d6, #ec3750);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-label:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(166, 51, 214, 0.4);
+    }
+    
+    .animate__animated.animate__fadeIn {
+        animation: fadeIn 0.8s ease-out;
+    }
+    
+    .animate__delay-1s {
+        animation-delay: 1s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 <div class="max-w-4xl mx-auto px-4 py-8 fade-in">
-  <div class="glass-card p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
+  <div class="glass-card p-8 rounded-2xl shadow-2xl animate__animated animate__fadeIn">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
       <div class="flex items-center">
-        <div class="bg-primary-500 bg-opacity-20 p-3 rounded-full mr-4">
-          <i class='bx bx-plus-circle text-3xl text-primary-400'></i>
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 p-4 rounded-full mr-4 shadow-lg">
+          <i class='bx bx-plus-circle text-3xl text-white icon-glow'></i>
         </div>
-        <h1 class="text-2xl font-bold text-white">Create Dev Log</h1>
+        <h1 class="text-3xl font-bold text-white handwritten">Create Dev Log</h1>
       </div>
-      <a href="{{ url_for('index') }}" class="flex items-center bg-slate-700 hover:bg-slate-600 px-4 py-2 text-white rounded-lg transition-all duration-300">
-        <i class='bx bx-arrow-back mr-2'></i> Back to Dashboard
+      <a href="{{ url_for('index') }}" class="btn-secondary px-6 py-3 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg">
+        <i class='bx bx-arrow-back'></i> Back to Dashboard
       </a>
     </div>
 
-      <form method="POST" enctype="multipart/form-data" class="space-y-6 animate__animated animate__fadeIn animate__delay-1s">
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-rename mr-2'></i> Project Name
+    <form method="POST" enctype="multipart/form-data" class="space-y-8 animate__animated animate__fadeIn animate__delay-1s">
+      <div class="field-container p-6 rounded-xl">
+        <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+          <i class='bx bx-rename mr-3 text-xl'></i> Project Name
+        </label>
+        <input type="text" name="project_name" required 
+               class="glass-input w-full p-4 rounded-xl text-white placeholder-gray-300 focus:outline-none" 
+               placeholder="Enter your awesome project name..." value="{{ project_name }}">
+      </div>
+      
+      <div class="field-container p-6 rounded-xl">
+        <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+          <i class='bx bx-tag mr-3 text-xl'></i> Dev Log Tag
+        </label>
+        <select name="project_tag" required 
+                class="glass-input w-full p-4 rounded-xl text-white focus:outline-none select-arrow appearance-none" value="{{ project_tag }}">
+          <option value="" disabled {% if not project_tag %}selected{% endif %} class="bg-gray-800">Select a tag</option>
+          <option value="CAD" {% if project_tag == 'CAD' %}selected{% endif %} class="bg-gray-800">🎨 CAD</option>
+          <option value="PCB" {% if project_tag == 'PCB' %}selected{% endif %} class="bg-gray-800">⚡ PCB</option>
+          <option value="Hardware" {% if project_tag == 'Hardware' %}selected{% endif %} class="bg-gray-800">🔧 Hardware</option>
+          <option value="Software" {% if project_tag == 'Software' %}selected{% endif %} class="bg-gray-800">💻 Software</option>
+          <option value="3D Printing" {% if project_tag == '3D Printing' %}selected{% endif %} class="bg-gray-800">🖨️ 3D Printing</option>
+          <option value="Research" {% if project_tag == 'Research' %}selected{% endif %} class="bg-gray-800">🔬 Research</option>
+        </select>
+      </div>
+
+      <div class="field-container p-6 rounded-xl">
+        <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+          <i class='bx bx-info-circle mr-3 text-xl'></i> Title
+        </label>
+        <input type="text" name="title" required 
+               class="glass-input w-full p-4 rounded-xl text-white placeholder-gray-300 focus:outline-none" 
+               placeholder="Brief title for this log entry">
+      </div>
+      
+      <div class="field-container p-6 rounded-xl">
+        <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+          <i class='bx bx-code-block mr-3 text-xl'></i> What I Did
+        </label>
+        <textarea name="what_did" required rows="5" 
+                  class="glass-input w-full p-4 rounded-xl text-white placeholder-gray-300 focus:outline-none resize-none" 
+                  placeholder="Tell us about your amazing progress today..."></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="field-container p-6 rounded-xl">
+          <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+            <i class='bx bx-error-circle mr-3 text-xl'></i> Issues Faced
           </label>
-          <input type="text" name="project_name" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Project Name" value="{{ project_name }}">
-        </div>
-        
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-tag mr-2'></i> Dev Log Tag
-          </label>
-          <select name="project_tag" required class="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" value="{{ project_tag }}">
-            <option value="" disabled {% if not project_tag %}selected{% endif %}>Select a tag</option>
-            <option value="CAD" {% if project_tag == 'CAD' %}selected{% endif %}>CAD</option>
-            <option value="PCB" {% if project_tag == 'PCB' %}selected{% endif %}>PCB</option>
-            <option value="Hardware" {% if project_tag == 'Hardware' %}selected{% endif %}>Hardware</option>
-            <option value="Software" {% if project_tag == 'Software' %}selected{% endif %}>Software</option>
-            <option value="3D Printing" {% if project_tag == '3D Printing' %}selected{% endif %}>3D Printing</option>
-            <option value="Research" {% if project_tag == 'Research' %}selected{% endif %}>Research</option>
-          </select>
+          <textarea name="issues_faced" rows="4" 
+                    class="glass-input w-full p-4 rounded-xl text-white placeholder-gray-300 focus:outline-none resize-none" 
+                    placeholder="Any challenges you conquered today..."></textarea>
         </div>
 
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-info-circle mr-2'></i> Title
+        <div class="field-container p-6 rounded-xl">
+          <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+            <i class='bx bx-chevrons-right mr-3 text-xl'></i> Next Steps
           </label>
-          <input type="text" name="title" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Brief title for this log entry">
+          <textarea name="next_steps" rows="4" 
+                    class="glass-input w-full p-4 rounded-xl text-white placeholder-gray-300 focus:outline-none resize-none" 
+                    placeholder="What exciting plans do you have next..."></textarea>
         </div>
-        
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-code-block mr-2'></i> What I Did
+      </div>
+      
+      <div class="field-container p-6 rounded-xl">
+        <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+          <i class='bx bx-time mr-3 text-xl'></i> Time Spent
+        </label>
+        <div class="flex items-center gap-4">
+          <input type="number" name="time_spent" required min="1" 
+                 class="glass-input flex-1 p-4 rounded-xl text-white placeholder-gray-300 focus:outline-none" 
+                 placeholder="How many minutes?">
+          <span class="text-yellow-400 font-semibold handwritten text-lg">minutes</span>
+        </div>
+      </div>
+
+      <div class="field-container p-6 rounded-xl">
+        <label class="flex items-center label-gradient font-bold mb-4 text-lg">
+          <i class='bx bx-image-alt mr-3 text-xl'></i> Screenshot or Video
+        </label>
+        <div class="file-input">
+          <input type="file" name="media_file" accept="image/*,video/*" required id="file-upload">
+          <label for="file-upload" class="file-label w-full p-4 rounded-xl text-white font-semibold flex items-center justify-center gap-3 cursor-pointer">
+            <i class='bx bx-upload text-xl'></i> Choose File
           </label>
-          <textarea name="what_did" required rows="4" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="What I did today..."></textarea>
         </div>
+        <p class="text-gray-300 text-sm mt-3 flex items-center handwritten">
+          <i class='bx bx-info-circle mr-2 text-cyan-400'></i> Upload a screenshot or video of your awesome work!
+        </p>
+      </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-            <label class="flex items-center text-primary-300 font-semibold mb-3">
-              <i class='bx bx-error-circle mr-2'></i> Issues Faced
-            </label>
-            <textarea name="issues_faced" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Any issues you faced today..."></textarea>
-          </div>
-
-          <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-            <label class="flex items-center text-primary-300 font-semibold mb-3">
-              <i class='bx bx-chevrons-right mr-2'></i> Next Steps
-            </label>
-            <textarea name="next_steps" rows="3" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="What you plan to do next..."></textarea>
-          </div>
-        </div>
-        
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-time mr-2'></i> Time Spent (minutes)
-          </label>
-          <input type="number" name="time_spent" required min="1" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="How many minutes did you spend?">
-        </div>
-
-        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
-          <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-image-alt mr-2'></i> Screenshot or Video
-          </label>
-          <div class="relative">
-            <input type="file" name="media_file" accept="image/*,video/*" required class="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-600">
-          </div>
-          <p class="text-slate-400 text-sm mt-2 flex items-center">
-            <i class='bx bx-info-circle mr-1'></i> Upload a screenshot or video of your work
-          </p>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-4 mt-8">
-          <button type="submit" class="btn-primary px-8 py-3 text-white font-semibold rounded-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-primary-500/20">
-            <i class='bx bx-save text-xl'></i> Create Dev Log
-          </button>
-          <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-8 py-3 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-300 shadow-lg">
-            <i class='bx bx-x text-xl'></i> Cancel
-          </a>
-        </div>
-      </form>
-    </div>
+      <div class="flex flex-col sm:flex-row gap-4 mt-10">
+        <button type="submit" class="btn-primary px-10 py-4 text-white font-bold rounded-xl flex items-center justify-center gap-3 shadow-2xl text-lg">
+          <i class='bx bx-save text-xl'></i> Create Dev Log
+        </button>
+        <a href="{{ url_for('index') }}" class="btn-secondary px-10 py-4 text-white font-bold rounded-xl flex items-center justify-center gap-3 shadow-2xl text-lg">
+          <i class='bx bx-x text-xl'></i> Cancel
+        </a>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}
@@ -125,4 +271,26 @@ if (urlParams.has('project_tag')) {
         }
     });
 }
+
+// File input enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('file-upload');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            const label = document.querySelector('label[for="file-upload"]');
+            if (fileName) {
+                label.innerHTML = `<i class='bx bx-check text-xl'></i> ${fileName}`;
+                label.style.background = 'linear-gradient(45deg, #33d6a6, #5bc0de)';
+            }
+        });
+    }
+
+    // Add subtle animation delays to form fields
+    const fields = document.querySelectorAll('.field-container');
+    fields.forEach((field, index) => {
+        field.style.animationDelay = `${index * 0.1}s`;
+        field.classList.add('animate__animated', 'animate__fadeIn');
+    });
+});
 </script>

@@ -3,50 +3,401 @@
 {% block title %}Create Project - Grounded Tracker{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="flex items-center mb-8">
-        <a href="{{ url_for('index') }}" class="text-primary-400 hover:text-primary-300 mr-4">
-            <i class='bx bx-arrow-back text-2xl'></i>
-        </a>
-        <h1 class="text-3xl font-bold text-white">Create New Project</h1>
+<style>
+    .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #ff8c37, #ec3750, #a633d6, #33d6a6, #5bc0de);
+        background-size: 400% 400%;
+        animation: gradientShift 8s ease-in-out infinite;
+        opacity: 0.1;
+        z-index: -1;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .container {
+        max-width: 1024px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideInDown 0.8s ease-out;
+    }
+    
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 140, 55, 0.2);
+        border: 2px solid #ff8c37;
+        border-radius: 12px;
+        color: #ff8c37;
+        text-decoration: none;
+        margin-right: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(255, 140, 55, 0.3);
+    }
+    
+    .back-btn:hover {
+        background: rgba(255, 140, 55, 0.3);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 12px 40px rgba(255, 140, 55, 0.4);
+    }
+    
+    .back-btn::before {
+        content: '←';
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(45deg, #ff8c37, #ec3750, #a633d6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(255, 140, 55, 0.5);
+    }
+    
+    .form-container {
+        background: rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideInUp 0.8s ease-out 0.2s both;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #ff8c37, #ec3750, #a633d6, transparent);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #f8fafc;
+        font-size: 1.1rem;
+    }
+    
+    .form-input, .form-textarea {
+        width: 100%;
+        background: rgba(30, 41, 59, 0.4);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        font-family: inherit;
+    }
+    
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #ff8c37;
+        box-shadow: 0 0 0 4px rgba(255, 140, 55, 0.2), 0 0 30px rgba(255, 140, 55, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+        font-family: inherit;
+    }
+    
+    .file-input {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .file-input input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .file-input-label {
+        display: block;
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: rgba(30, 41, 59, 0.4);
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        color: #cbd5e1;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .file-input:hover .file-input-label {
+        border-color: #ff8c37;
+        background: rgba(255, 140, 55, 0.1);
+        color: #ff8c37;
+        transform: translateY(-2px);
+    }
+    
+    .file-hint {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 3rem;
+        animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+    
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        backdrop-filter: blur(10px);
+        font-family: inherit;
+    }
+    
+    .btn-secondary {
+        background: rgba(71, 85, 105, 0.6);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(71, 85, 105, 0.8);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(71, 85, 105, 0.4);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(45deg, #ff8c37, #ec3750);
+        color: white;
+        border: 2px solid transparent;
+        box-shadow: 0 8px 32px rgba(255, 140, 55, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 40px rgba(255, 140, 55, 0.4);
+    }
+    
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+        
+        .form-container {
+            padding: 2rem;
+        }
+        
+        .main-title {
+            font-size: 2rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="animated-bg"></div>
+
+<div class="container">
+    <div class="header">
+        <a href="{{ url_for('index') }}" class="back-btn"></a>
+        <h1 class="main-title">Create New Project</h1>
     </div>
     
-    <div class="glass-card p-8 rounded-lg">
-        <form method="POST" action="{{ url_for('create_project_page') }}" class="space-y-6" enctype="multipart/form-data">
-            <div>
-                <label for="project_name" class="block text-white font-medium mb-2">Project Name</label>
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('create_project_page') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="project_name" class="form-label">Project Name</label>
                 <input type="text" id="project_name" name="project_name" required 
-                    class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                       class="form-input" placeholder="Enter your project name">
             </div>
             
-            <div>
-                <label for="description" class="block text-white font-medium mb-2">Description</label>
-                <textarea id="description" name="description" rows="4" required 
-                    class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" name="description" required 
+                          class="form-textarea" placeholder="Describe your project..."></textarea>
             </div>
 
-            <div>
-                <label for="github_link" class="block text-white font-medium mb-2">Github Link</label>
-                <input type="text" id="github_link" name="github_link" required 
-                    class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <div class="form-group">
+                <label for="github_link" class="form-label">Github Link</label>
+                <input type="url" id="github_link" name="github_link" required 
+                       class="form-input" placeholder="https://github.com/username/repository">
             </div>
             
-            <div>
-                <label for="cover_image" class="block text-white font-medium mb-2">Cover Image (Optional)</label>
-                <input type="file" id="cover_image" name="cover_image" accept="image/*" 
-                    class="w-full bg-slate-800 bg-opacity-50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <p class="text-gray-400 text-sm mt-1">If no image is uploaded, a default image will be used.</p>
+            <div class="form-group">
+                <label for="cover_image" class="form-label">Cover Image (Optional)</label>
+                <div class="file-input">
+                    <input type="file" id="cover_image" name="cover_image" accept="image/*">
+                    <label for="cover_image" class="file-input-label">
+                        📁 Choose file or drag and drop
+                    </label>
+                </div>
+                <p class="file-hint">If no image is uploaded, a default image will be used.</p>
             </div>
             
-            <div class="flex justify-end space-x-4">
-                <a href="{{ url_for('index') }}" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all duration-300">
-                    Cancel
-                </a>
-                <button type="submit" class="btn-primary px-6 py-3 text-white rounded-lg font-semibold">
-                    Create Project
+            <div class="form-actions">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    ✨ Create Project
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    // Add smooth animations and interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-input, .form-textarea');
+        
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+
+        // File input enhancement
+        const fileInput = document.getElementById('cover_image');
+        const fileLabel = document.querySelector('.file-input-label');
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileLabel.textContent = `📄 ${this.files[0].name}`;
+                fileLabel.style.color = '#ff8c37';
+            } else {
+                fileLabel.textContent = '📁 Choose file or drag and drop';
+                fileLabel.style.color = '#cbd5e1';
+            }
+        });
+
+        // Form submission enhancement
+        const form = document.querySelector('form');
+        const submitBtn = document.querySelector('.btn-primary');
+        
+        form.addEventListener('submit', function(e) {
+            submitBtn.innerHTML = '⏳ Creating...';
+            submitBtn.disabled = true;
+        });
+    });
+</script>
 {% endblock %}

@@ -1,107 +1,388 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Grounded Tracker</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        @font-face {
+            font-family: 'Phantom Sans';
+            src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff') format('woff'),
+                 url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
 
-{% block title %}Login - Grounded Tracker{% endblock %}
+        @font-face {
+            font-family: 'Phantom Sans';
+            src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff') format('woff'),
+                 url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff2') format('woff2');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
 
-{% block content %}
-<!-- Add Hack Club fonts and theme -->
-<style>
-  @font-face {
-    font-family: 'Phantom Sans';
-    src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff') format('woff'),
-         url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Phantom Sans';
-    src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff') format('woff'),
-         url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff2') format('woff2');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  :root {
-    --red: #ec3750;
-    --orange: #ff8c37;
-    --yellow: #f1c40f;
-    --green: #33d6a6;
-    --cyan: #5bc0de;
-    --blue: #338eda;
-    --purple: #a633d6;
-  }
-  
-  .login-container {
-    font-family: 'Phantom Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  
-  .hack-gradient {
-    background: linear-gradient(90deg, var(--orange), var(--red));
-  }
-  
-  .hack-btn {
-    background: linear-gradient(90deg, var(--orange), var(--red));
-    transition: all 0.2s ease;
-    transform: scale(1);
-  }
-  
-  .hack-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(236, 55, 80, 0.3);
-  }
-  
-  .hack-text-gradient {
-    background: linear-gradient(90deg, var(--orange), var(--red));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-  }
-  
-  .hack-card {
-    background: rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(12px);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-    transition: all 0.2s ease;
-    border: none;
-  }
-  
-  .hack-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
-  }
-</style>
+        :root {
+            --orange: #ff8c37;
+            --red: #ec3750;
+            --purple: #a633d6;
+            --yellow: #f1c40f;
+            --green: #33d6a6;
+            --cyan: #5bc0de;
+            --blue: #338eda;
+            --slate-dark: #0f172a;
+            --slate-medium: #1e293b;
+            --slate-purple: #312e81;
+        }
 
-<div class="flex items-center justify-center min-h-screen login-container">
-    <div class="hack-card p-8 max-w-md w-full text-center animate__animated animate__fadeIn relative overflow-hidden">
-        <!-- Decorative elements inspired by Hack Club -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full translate-x-16 -translate-y-16 blur-xl"></div>
-        <div class="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full -translate-x-16 translate-y-16 blur-xl"></div>
-        
-        <div class="mb-8 relative z-10">
-            <div class="flex justify-center mb-4">
-                <div class="hack-gradient p-4 rounded-full">
-                    <i class='bx bx-time-five text-5xl text-white'></i>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Phantom Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--slate-dark) 0%, var(--slate-medium) 50%, var(--slate-purple) 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 140, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(236, 55, 80, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(166, 51, 214, 0.08) 0%, transparent 50%);
+            animation: colorShift 8s ease-in-out infinite;
+        }
+
+        @keyframes colorShift {
+            0%, 100% { 
+                background: 
+                    radial-gradient(circle at 20% 20%, rgba(255, 140, 55, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(236, 55, 80, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 50% 50%, rgba(166, 51, 214, 0.08) 0%, transparent 50%);
+            }
+            33% { 
+                background: 
+                    radial-gradient(circle at 80% 30%, rgba(236, 55, 80, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 20% 70%, rgba(166, 51, 214, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 60% 20%, rgba(255, 140, 55, 0.08) 0%, transparent 50%);
+            }
+            66% { 
+                background: 
+                    radial-gradient(circle at 50% 80%, rgba(166, 51, 214, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 30% 20%, rgba(255, 140, 55, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 50%, rgba(236, 55, 80, 0.08) 0%, transparent 50%);
+            }
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hack-gradient-text {
+            background: linear-gradient(90deg, var(--orange), var(--red), var(--purple));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 4s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hack-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px 0 rgba(31, 38, 135, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .hack-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 140, 55, 0.1) 0%, 
+                rgba(236, 55, 80, 0.1) 50%, 
+                rgba(166, 51, 214, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .hack-card:hover::before {
+            opacity: 1;
+        }
+
+        .hack-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 60px 0 rgba(31, 38, 135, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .hack-btn {
+            background: linear-gradient(135deg, var(--orange), var(--red), var(--purple));
+            background-size: 200% 200%;
+            transition: all 0.3s ease;
+            transform: scale(1);
+            position: relative;
+            overflow: hidden;
+            animation: gradientShift 6s ease-in-out infinite;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: bold;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .hack-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .hack-btn:hover::before {
+            left: 100%;
+        }
+
+        .hack-btn:hover {
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 
+                0 8px 32px rgba(255, 140, 55, 0.4),
+                0 0 20px rgba(236, 55, 80, 0.3),
+                0 0 40px rgba(166, 51, 214, 0.2);
+        }
+
+        .icon-container {
+            background: linear-gradient(135deg, var(--orange), var(--red));
+            background-size: 200% 200%;
+            animation: gradientShift 5s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+            padding: 1rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .icon-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 10%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255, 140, 55, 0.2) 0%, transparent 70%);
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            bottom: 20%;
+            left: 15%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(236, 55, 80, 0.2) 0%, transparent 70%);
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            top: 60%;
+            right: 20%;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(166, 51, 214, 0.2) 0%, transparent 70%);
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        .handwritten {
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 0.9em;
+            transform: rotate(-1deg);
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .orpheus-icon {
+            filter: drop-shadow(0 0 10px rgba(255, 140, 55, 0.3));
+            transition: all 0.3s ease;
+            height: 2rem;
+            margin-top: 2rem;
+            opacity: 0.7;
+        }
+
+        .orpheus-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+            filter: drop-shadow(0 0 20px rgba(255, 140, 55, 0.5));
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .security-note {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            margin-top: 2rem;
+        }
+
+        .btn-icon {
+            font-size: 1.25rem;
+            margin-right: 0.75rem;
+        }
+
+        .main-icon {
+            font-size: 3rem;
+            color: white;
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    
+    <div class="login-container">
+        <div class="hack-card animate-fade-in">
+            <div class="animate-slide-up">
+                <div class="icon-container">
+                    <i class='bx bx-time-five main-icon'></i>
                 </div>
             </div>
-            <h1 class="text-3xl font-bold hack-text-gradient mb-2">Grounded Tracker</h1>
-            <p class="text-slate-300">Track your development journey and reflect on your progress</p>
-        </div>
+            
+            <h1 class="hack-gradient-text animate-slide-up">
+                Grounded Tracker
+            </h1>
+            
+            <p class="handwritten animate-slide-up">
+                Track your development journey and reflect on your progress ✨
+            </p>
 
-        <a href="{{ auth_url }}" class="hack-btn inline-flex items-center justify-center px-8 py-3 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 animate__animated animate__pulse animate__delay-1s">
-            <i class='bx bxl-slack text-xl mr-2'></i> Login with Slack
-        </a>
-        
-        <p class="text-slate-400 text-sm mt-8 animate__animated animate__fadeIn animate__delay-2s relative z-10">
-            <i class='bx bx-info-circle'></i> Securely login with your Slack account
-        </p>
-        
-        <!-- Small Orpheus icon -->
-        <div class="mt-8 opacity-70">
-            <img src="https://assets.hackclub.com/icon-rounded.svg" alt="Hack Club" class="h-8 mx-auto">
+            <a href="{{ auth_url }}" class="hack-btn animate-bounce-in">
+                <i class='bx bxl-slack btn-icon'></i>
+                Login with Slack
+            </a>
+
+            <p class="security-note animate-fade-in">
+                <i class='bx bx-shield-check'></i>
+                Securely login with your Slack account
+            </p>
+
+            <div class="animate-fade-in">
+                <img src="https://assets.hackclub.com/icon-rounded.svg" 
+                     alt="Hack Club" 
+                     class="orpheus-icon">
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>

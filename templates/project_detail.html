@@ -7,12 +7,12 @@
     <!-- Enhanced Header with Breadcrumb -->
     <div id="project-header" class="glass-card p-8 mb-8 animate__animated animate__fadeIn relative overflow-hidden">
         <!-- Animated background gradient -->
-        <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-blue-500/10 animate-pulse"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-purple-500/20 to-red-500/20 animate-pulse"></div>
         
         <div class="relative z-10">
             <div class="flex items-center gap-2 mb-6">
                 <nav class="flex items-center space-x-2 text-sm">
-                    <a href="{{ url_for('index') }}" class="flex items-center text-primary-400 hover:text-primary-300 transition-all duration-300 hover:scale-105">
+                    <a href="{{ url_for('index') }}" class="flex items-center text-orange-400 hover:text-orange-300 transition-all duration-300 hover:scale-105 hover:rotate-1">
                         <i class='bx bx-home mr-1'></i>
                         <span>Projects</span>
                     </a>
@@ -23,12 +23,12 @@
             
             <div id="project-loading" class="flex justify-center items-center py-12">
                 <div class="relative">
-                    <div class="animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-primary-400"></div>
-                    <div class="absolute inset-0 rounded-full border-2 border-primary-200 opacity-20"></div>
+                    <div class="animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-orange-400"></div>
+                    <div class="absolute inset-0 rounded-full border-2 border-orange-200 opacity-20 animate-pulse"></div>
                 </div>
                 <div class="ml-6">
-                    <p class="text-gray-200 text-lg font-medium">Loading project details...</p>
-                    <p class="text-gray-400 text-sm mt-1">Please wait while we fetch the information</p>
+                    <p class="text-white text-lg font-medium">Loading project details...</p>
+                    <p class="text-gray-300 text-sm mt-1">Please wait while we fetch the information</p>
                 </div>
             </div>
             
@@ -40,29 +40,27 @@
     
     <!-- Enhanced Logs Section -->
     <div class="glass-card p-8 animate__animated animate__fadeIn animate__delay-1s relative overflow-hidden">
-        <!-- Subtle pattern overlay -->
-        <div class="absolute inset-0 opacity-5">
-            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
-        </div>
+        <!-- Animated background pattern -->
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-orange-500/10 to-red-500/10 animate-pulse"></div>
         
         <div class="relative z-10">
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="p-3 bg-primary-500/20 rounded-xl">
-                        <i class='bx bx-history text-primary-400 text-3xl'></i>
+                    <div class="p-3 bg-gradient-to-r from-orange-500/20 to-purple-500/20 rounded-xl backdrop-blur-sm border border-orange-500/30">
+                        <i class='bx bx-history text-orange-400 text-3xl'></i>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-white">Development Logs</h2>
-                        <p class="text-gray-400 text-sm mt-1">Track your project progress and milestones</p>
+                        <h2 class="text-2xl font-bold text-white bg-gradient-to-r from-orange-400 to-purple-400 bg-clip-text text-transparent">Development Logs</h2>
+                        <p class="text-gray-300 text-sm mt-1">Track your project progress and milestones</p>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-3">
                     <!-- Stats indicator -->
-                    <div id="logs-stats" class="hidden bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <div id="logs-stats" class="hidden glass-card px-4 py-2 rounded-lg border border-orange-500/30">
                         <div class="flex items-center gap-4 text-sm">
                             <div class="flex items-center gap-1">
-                                <i class='bx bx-notepad text-primary-400'></i>
+                                <i class='bx bx-notepad text-orange-400'></i>
                                 <span class="text-gray-300"><span id="total-logs">0</span> logs</span>
                             </div>
                             <div class="flex items-center gap-1">
@@ -72,7 +70,7 @@
                         </div>
                     </div>
                     
-                    <a id="create-log-btn" href="#" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+                    <a id="create-log-btn" href="#" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-6 py-3 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 hover:rotate-1 group">
                         <i class='bx bx-plus group-hover:rotate-90 transition-transform duration-300'></i> 
                         <span>Add Dev Log</span>
                     </a>
@@ -82,13 +80,13 @@
             <!-- Filter and Search -->
             <div id="log-controls" class="hidden mb-6 flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative">
-                    <input type="text" id="log-search" placeholder="Search logs..." class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    <input type="text" id="log-search" placeholder="Search logs..." class="w-full glass-card border border-orange-500/30 rounded-lg px-4 py-2 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent backdrop-blur-sm">
                     <i class='bx bx-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'></i>
                 </div>
-                <select id="tag-filter" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <select id="tag-filter" class="glass-card border border-orange-500/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 backdrop-blur-sm">
                     <option value="">All Tags</option>
                 </select>
-                <button id="sort-toggle" class="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2">
+                <button id="sort-toggle" class="glass-card border border-orange-500/30 rounded-lg px-4 py-2 text-white hover:bg-orange-500/10 transition-all duration-300 hover:scale-105 hover:rotate-1 flex items-center gap-2">
                     <i class='bx bx-sort-alt-2'></i>
                     <span>Latest First</span>
                 </button>
@@ -97,12 +95,12 @@
             <div id="logs-container" class="space-y-6">
                 <div class="flex justify-center items-center py-12">
                     <div class="relative">
-                        <div class="animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-primary-400"></div>
-                        <div class="absolute inset-0 rounded-full border-2 border-primary-200 opacity-20"></div>
+                        <div class="animate-spin rounded-full h-16 w-16 border-t-3 border-b-3 border-orange-400"></div>
+                        <div class="absolute inset-0 rounded-full border-2 border-orange-200 opacity-20 animate-pulse"></div>
                     </div>
                     <div class="ml-6">
-                        <p class="text-gray-200 text-lg font-medium">Loading project logs...</p>
-                        <p class="text-gray-400 text-sm mt-1">Fetching development history</p>
+                        <p class="text-white text-lg font-medium">Loading project logs...</p>
+                        <p class="text-gray-300 text-sm mt-1">Fetching development history</p>
                     </div>
                 </div>
             </div>
@@ -141,15 +139,15 @@ function formatDate(dateString) {
 
 function getTagColor(tag) {
     const colors = {
-        'CAD': 'bg-blue-500',
-        'PCB': 'bg-purple-500',
-        'Hardware': 'bg-orange-500',
-        'Software': 'bg-emerald-500',
-        '3D Printing': 'bg-pink-500',
-        'Research': 'bg-indigo-500'
+        'CAD': 'bg-gradient-to-r from-blue-500 to-cyan-500',
+        'PCB': 'bg-gradient-to-r from-purple-500 to-pink-500',
+        'Hardware': 'bg-gradient-to-r from-orange-500 to-red-500',
+        'Software': 'bg-gradient-to-r from-green-500 to-emerald-500',
+        '3D Printing': 'bg-gradient-to-r from-pink-500 to-purple-500',
+        'Research': 'bg-gradient-to-r from-indigo-500 to-blue-500'
     };
     
-    return colors[tag] || 'bg-primary-500';
+    return colors[tag] || 'bg-gradient-to-r from-orange-500 to-red-500';
 }
 
 function updateStats() {
@@ -203,11 +201,11 @@ function renderLogs() {
             container.innerHTML = `
                 <div class="text-center py-16 animate__animated animate__fadeIn">
                     <div class="mb-6">
-                        <i class='bx bx-notepad text-6xl text-gray-400 mb-4'></i>
-                        <h3 class="text-xl font-semibold text-gray-300 mb-2">No Development Logs Yet</h3>
-                        <p class="text-gray-400">Start documenting your project progress by creating your first log entry.</p>
+                        <i class='bx bx-notepad text-6xl text-orange-400 mb-4 animate-pulse'></i>
+                        <h3 class="text-xl font-semibold text-white mb-2">No Development Logs Yet</h3>
+                        <p class="text-gray-300">Start documenting your project progress by creating your first log entry.</p>
                     </div>
-                    <a href="{{ url_for('create_log') }}" id="empty-create-log-btn" class="btn-primary inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300">
+                    <a href="{{ url_for('create_log') }}" id="empty-create-log-btn" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl font-semibold hover:scale-105 hover:rotate-1 transition-all duration-300 shadow-lg shadow-orange-500/30">
                         <i class='bx bx-plus'></i> Create First Log
                     </a>
                 </div>
@@ -215,9 +213,9 @@ function renderLogs() {
         } else {
             container.innerHTML = `
                 <div class="text-center py-16 animate__animated animate__fadeIn">
-                    <i class='bx bx-search text-6xl text-gray-400 mb-4'></i>
-                    <h3 class="text-xl font-semibold text-gray-300 mb-2">No Logs Found</h3>
-                    <p class="text-gray-400">Try adjusting your search or filter criteria.</p>
+                    <i class='bx bx-search text-6xl text-orange-400 mb-4 animate-pulse'></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">No Logs Found</h3>
+                    <p class="text-gray-300">Try adjusting your search or filter criteria.</p>
                 </div>
             `;
         }
@@ -237,87 +235,87 @@ function renderLogs() {
         const status = log.fields['Status'] || 'Pending';
         
         const statusColors = {
-            'Approved': 'bg-green-500',
-            'Denied': 'bg-red-500',
-            'Pending': 'bg-yellow-500'
+            'Approved': 'bg-gradient-to-r from-green-500 to-emerald-500',
+            'Denied': 'bg-gradient-to-r from-red-500 to-pink-500',
+            'Pending': 'bg-gradient-to-r from-yellow-500 to-orange-500'
         };
         
-        const statusColor = statusColors[status] || 'bg-yellow-500';
+        const statusColor = statusColors[status] || 'bg-gradient-to-r from-yellow-500 to-orange-500';
         const tagColor = getTagColor(projectTag);
         const createdDate = createdAt ? formatDate(createdAt) : '';
         const animationDelay = index < 5 ? `animate__delay-${index+1}s` : '';
         
         return `
-        <div class="glass-card p-6 rounded-xl hover:shadow-xl transition-all duration-300 animate__animated animate__fadeIn ${animationDelay} group border border-slate-700/50 hover:border-primary-500/30">
+        <div class="glass-card p-6 rounded-xl shadow-lg shadow-orange-500/10 hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-300 animate__animated animate__fadeIn ${animationDelay} group border border-orange-500/20 hover:border-orange-500/40 hover:scale-[1.02] hover:rotate-1">
             <div class="flex flex-col md:flex-row justify-between items-start mb-4 gap-3">
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">${projectTag}</span>
-                        <span class="${statusColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">${status}</span>
-                        <span class="text-gray-400 text-sm flex items-center gap-1">
-                            <i class='bx bx-time'></i>
+                        <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg backdrop-blur-sm">${projectTag}</span>
+                        <span class="${statusColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg backdrop-blur-sm">${status}</span>
+                        <span class="text-gray-300 text-sm flex items-center gap-1">
+                            <i class='bx bx-time text-orange-400'></i>
                             ${createdDate}
                         </span>
                     </div>
-                    <h3 class="text-white text-xl font-semibold group-hover:text-primary-300 transition-colors duration-300">${title}</h3>
+                    <h3 class="text-white text-xl font-semibold group-hover:text-orange-300 transition-colors duration-300">${title}</h3>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="flex items-center bg-slate-800/70 px-4 py-2 rounded-full border border-slate-700">
-                        <i class='bx bx-stopwatch text-primary-400 mr-2'></i>
+                    <div class="flex items-center glass-card px-4 py-2 rounded-full border border-orange-500/30">
+                        <i class='bx bx-stopwatch text-orange-400 mr-2'></i>
                         <span class="text-gray-200 text-sm font-medium">${timeSpentHours} hrs</span>
                     </div>
                     <div class="flex space-x-2">
-                        <a href="/edit-log?id=${log.id}" class="text-blue-400 hover:text-blue-300 bg-slate-800/70 p-2 rounded-full transition-all duration-300 hover:bg-slate-700 hover:scale-110" title="Edit log">
+                        <a href="/edit-log?id=${log.id}" class="text-blue-400 hover:text-blue-300 glass-card p-2 rounded-full transition-all duration-300 hover:scale-110 hover:rotate-12 border border-blue-500/30" title="Edit log">
                             <i class='bx bx-edit text-lg'></i>
                         </a>
-                        <button onclick="deleteLog('${log.id}')" class="text-red-400 hover:text-red-300 bg-slate-800/70 p-2 rounded-full transition-all duration-300 hover:bg-slate-700 hover:scale-110" title="Delete log">
+                        <button onclick="deleteLog('${log.id}')" class="text-red-400 hover:text-red-300 glass-card p-2 rounded-full transition-all duration-300 hover:scale-110 hover:rotate-12 border border-red-500/30" title="Delete log">
                             <i class='bx bx-trash text-lg'></i>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-slate-800/30 p-6 rounded-xl mb-4 border border-slate-700/50">
+            <div class="glass-card p-6 rounded-xl mb-4 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
                 <div class="flex items-center gap-2 mb-3">
-                    <i class='bx bx-code-block text-primary-400'></i>
-                    <h4 class="text-primary-300 font-medium">What I Did</h4>
+                    <i class='bx bx-code-block text-orange-400'></i>
+                    <h4 class="text-orange-300 font-medium">What I Did</h4>
                 </div>
                 <p class="text-white leading-relaxed">${whatIDid}</p>
             </div>
             
-            <div class="bg-slate-800/30 p-6 rounded-xl mb-4 border border-slate-700/50">
+            <div class="glass-card p-6 rounded-xl mb-4 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
                 <div class="flex items-center gap-2 mb-3">
-                    <i class='bx bx-right-arrow-alt text-primary-400'></i>
-                    <h4 class="text-primary-300 font-medium">Next Steps</h4>
+                    <i class='bx bx-right-arrow-alt text-purple-400'></i>
+                    <h4 class="text-purple-300 font-medium">Next Steps</h4>
                 </div>
                 <p class="text-white leading-relaxed">${next_steps}</p>
             </div>
 
-            <div class="bg-slate-800/30 p-6 rounded-xl mb-4 border border-slate-700/50">
+            <div class="glass-card p-6 rounded-xl mb-4 border border-red-500/20 hover:border-red-500/40 transition-all duration-300">
                 <div class="flex items-center gap-2 mb-3">
-                    <i class='bx bx-error-circle text-primary-400'></i>
-                    <h4 class="text-primary-300 font-medium">Issues Faced</h4>
+                    <i class='bx bx-error-circle text-red-400'></i>
+                    <h4 class="text-red-300 font-medium">Issues Faced</h4>
                 </div>
                 <p class="text-white leading-relaxed">${issuesFaced}</p>
             </div>
             
             ${mediaURL ? `
             <div class="mt-4">
-                <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                <div class="glass-card p-4 rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300">
                     <div class="flex items-center gap-2 mb-3">
-                        <i class='bx bx-image text-primary-400'></i>
-                        <h4 class="text-primary-300 font-medium">Attached Media</h4>
+                        <i class='bx bx-image text-cyan-400'></i>
+                        <h4 class="text-cyan-300 font-medium">Attached Media</h4>
                     </div>
                     ${(() => {
                         const url = mediaURL;
                         const fileExt = url.split('.').pop().toLowerCase();
                         
                         if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
-                            return `<img src="${url}" class="rounded-lg max-h-96 object-contain border border-slate-700/50 hover:border-primary-500/50 transition-all duration-300" alt="Log media">`;
+                            return `<img src="${url}" class="rounded-lg max-h-96 object-contain border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-300 hover:scale-105" alt="Log media">`;
                         } else if (['mp4', 'webm', 'ogg'].includes(fileExt)) {
-                            return `<video controls class="rounded-lg max-h-96 w-full border border-slate-700/50"><source src="${url}" type="video/${fileExt}">Your browser does not support the video tag.</video>`;
+                            return `<video controls class="rounded-lg max-h-96 w-full border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-300"><source src="${url}" type="video/${fileExt}">Your browser does not support the video tag.</video>`;
                         } else {
-                            return `<a href="${url}" target="_blank" class="text-primary-400 hover:text-primary-300 flex items-center gap-2 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-primary-500/50 transition-all duration-300">
+                            return `<a href="${url}" target="_blank" class="text-cyan-400 hover:text-cyan-300 flex items-center gap-2 p-3 glass-card rounded-lg border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-300 hover:scale-105 hover:rotate-1">
                                 <i class='bx bx-file text-xl'></i> 
                                 <span>View attached file</span>
                                 <i class='bx bx-external-link text-sm'></i>
@@ -356,23 +354,23 @@ fetch(`/api/projects/${projectId}`)
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 p-8 w-full">
                     <div class="flex items-center gap-2 mb-3">
-                        <i class='bx bx-calendar text-primary-400'></i>
+                        <i class='bx bx-calendar text-orange-400'></i>
                         <span class="text-gray-300 text-sm">${createdDate}</span>
                     </div>
-                    <h1 class="text-4xl font-bold text-white mb-2">${project.fields['Project Name']}</h1>
+                    <h1 class="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-orange-400 to-purple-400 bg-clip-text text-transparent">${project.fields['Project Name']}</h1>
                 </div>
             </div>
             
-            <div class="bg-slate-800/30 p-8 rounded-xl mb-6 border border-slate-700/50">
+            <div class="glass-card p-8 rounded-xl mb-6 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
                 <div class="flex items-center gap-2 mb-4">
-                    <i class='bx bx-info-circle text-primary-400 text-xl'></i>
-                    <h3 class="text-primary-300 font-medium text-lg">Project Description</h3>
+                    <i class='bx bx-info-circle text-orange-400 text-xl'></i>
+                    <h3 class="text-orange-300 font-medium text-lg">Project Description</h3>
                 </div>
                 <p class="text-white leading-relaxed text-lg">${project.fields['Description'] || 'No description provided.'}</p>
             </div>
             
             <div class="flex justify-end mt-6 gap-4">
-                <a href="/edit-project?id=${project.id}" class="bg-slate-700/70 hover:bg-slate-600 px-6 py-3 text-white rounded-xl flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-slate-600">
+                <a href="/edit-project?id=${project.id}" class="glass-card hover:bg-orange-500/10 px-6 py-3 text-white rounded-xl flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:rotate-1 border border-orange-500/30 hover:border-orange-500/50">
                     <i class='bx bx-edit'></i> Edit Project
                 </a>
             </div>
@@ -385,10 +383,10 @@ fetch(`/api/projects/${projectId}`)
         console.error('Error loading project:', error);
         document.getElementById('project-loading').innerHTML = `
             <div class="text-center py-12 w-full">
-                <i class='bx bx-error-circle text-6xl text-red-400 mb-4'></i>
+                <i class='bx bx-error-circle text-6xl text-red-400 mb-4 animate-pulse'></i>
                 <h3 class="text-xl font-semibold text-red-300 mb-2">Failed to Load Project</h3>
-                <p class="text-gray-400 mb-6">There was an error loading the project details.</p>
-                <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 text-white rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 transition-all duration-300">
+                <p class="text-gray-300 mb-6">There was an error loading the project details.</p>
+                <a href="{{ url_for('index') }}" class="glass-card hover:bg-orange-500/10 px-6 py-3 text-white rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 hover:rotate-1 transition-all duration-300 border border-orange-500/30">
                     <i class='bx bx-arrow-back'></i> Back to Projects
                 </a>
             </div>
@@ -476,11 +474,11 @@ fetch(`/api/projects/${projectId}/logs`)
         console.error('Error loading logs:', error);
         document.getElementById('logs-container').innerHTML = `
             <div class="text-center py-16 animate__animated animate__fadeIn">
-                <i class='bx bx-error-circle text-6xl text-red-400 mb-4'></i>
+                <i class='bx bx-error-circle text-6xl text-red-400 mb-4 animate-pulse'></i>
                 <h3 class="text-xl font-semibold text-red-300 mb-2">Error Loading Logs</h3>
-                <p class="text-gray-400 mb-6">There was an error loading the project logs. Check the console for details.</p>
-                <p class="text-sm text-gray-500 mb-6">Error: ${error.message}</p>
-                <button onclick="window.location.reload()" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 flex items-center gap-2 mx-auto">
+                <p class="text-gray-300 mb-6">There was an error loading the project logs. Check the console for details.</p>
+                <p class="text-sm text-gray-400 mb-6">Error: ${error.message}</p>
+                <button onclick="window.location.reload()" class="glass-card hover:bg-orange-500/10 px-6 py-3 text-white rounded-xl font-semibold hover:scale-105 hover:rotate-1 transition-all duration-300 flex items-center gap-2 mx-auto border border-orange-500/30">
                     <i class='bx bx-refresh'></i> Try Again
                 </button>
             </div>

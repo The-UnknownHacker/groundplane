@@ -6,7 +6,7 @@
     <title>{% block title %}Dev Log Timer{% endblock %}</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
 
@@ -16,20 +16,29 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
+                            orange: '#ff8c37',
+                            red: '#ec3750',
+                            purple: '#a633d6',
+                            yellow: '#f1c40f',
+                            green: '#33d6a6',
+                            cyan: '#5bc0de',
+                            blue: '#338eda',
                         },
+                        slate: {
+                            950: '#0f172a',
+                            900: '#1e293b',
+                            800: '#312e81',
+                        }
                     },
                     animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                        'gradient-y': 'gradient-y 3s ease infinite',
+                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite alternate',
+                        'float': 'float 4s ease-in-out infinite',
+                    },
+                    fontFamily: {
+                        'phantom': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                        'comic': ['"Comic Sans MS"', 'cursive'],
                     }
                 }
             }
@@ -38,34 +47,51 @@
 
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             scroll-behavior: smooth;
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .glass-card:hover {
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #0d9488, #14b8a6); /* teal gradient */
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(166, 51, 214, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 140, 55, 0.5), rgba(236, 55, 80, 0.5), rgba(166, 51, 214, 0.5), transparent);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px 0 rgba(255, 140, 55, 0.2), 0 0 30px rgba(236, 55, 80, 0.15);
+            border: 1px solid rgba(255, 140, 55, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8c37, #ec3750, #a633d6);
+            background-size: 300% 300%;
+            animation: gradient-x 3s ease infinite;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 140, 55, 0.3);
+        }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(20, 184, 166, 0.4); /* teal shadow */
+            transform: translateY(-3px) rotate(1deg);
+            box-shadow: 0 8px 30px rgba(255, 140, 55, 0.4), 0 0 20px rgba(236, 55, 80, 0.3);
+            animation-duration: 1s;
         }
         
         .btn-primary::after {
@@ -75,7 +101,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transform: translateX(-100%);
         }
         
@@ -83,54 +109,169 @@
             transform: translateX(100%);
             transition: transform 0.6s ease;
         }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #33d6a6, #5bc0de, #338eda);
+            background-size: 300% 300%;
+            animation: gradient-x 4s ease infinite;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(51, 214, 166, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) rotate(-1deg);
+            box-shadow: 0 8px 30px rgba(51, 214, 166, 0.4), 0 0 20px rgba(91, 192, 222, 0.3);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #f1c40f, #ff8c37);
+            background-size: 200% 200%;
+            animation: gradient-y 2s ease infinite;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(241, 196, 15, 0.3);
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(241, 196, 15, 0.4), 0 0 20px rgba(255, 140, 55, 0.3);
+        }
         
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
         
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(20, 184, 166, 0.5);
+            background: rgba(15, 23, 42, 0.8);
             border-radius: 10px;
         }
         
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff8c37, #ec3750);
+            border-radius: 10px;
+            border: 2px solid rgba(15, 23, 42, 0.8);
+        }
+        
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(20, 184, 166, 0.7);
+            background: linear-gradient(45deg, #ec3750, #a633d6);
+        }
+        
+        /* Animations */
+        @keyframes gradient-x {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes gradient-y {
+            0%, 100% { background-position: 50% 0%; }
+            50% { background-position: 50% 100%; }
+        }
+        
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 20px rgba(255, 140, 55, 0.3); }
+            to { box-shadow: 0 0 40px rgba(236, 55, 80, 0.5), 0 0 60px rgba(166, 51, 214, 0.3); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
         
         /* Fade-in animation for content */
         .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Gradient background animation */
+        .bg-animated {
+            background: linear-gradient(135deg, #0f172a, #1e293b, #312e81, #1e293b, #0f172a);
+            background-size: 400% 400%;
+            animation: gradient-x 8s ease infinite;
+        }
+
+        /* Glowing text effect */
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 140, 55, 0.5), 0 0 20px rgba(236, 55, 80, 0.3);
+        }
+
+        /* Handwritten style elements */
+        .handwritten {
+            font-family: 'Comic Sans MS', cursive;
+            transform: rotate(-1deg);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Floating elements */
+        .float-element {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Alert styling */
+        .alert-success {
+            background: linear-gradient(135deg, rgba(51, 214, 166, 0.2), rgba(91, 192, 222, 0.2));
+            border: 1px solid rgba(51, 214, 166, 0.3);
+            box-shadow: 0 4px 20px rgba(51, 214, 166, 0.15);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, rgba(236, 55, 80, 0.2), rgba(166, 51, 214, 0.2));
+            border: 1px solid rgba(236, 55, 80, 0.3);
+            box-shadow: 0 4px 20px rgba(236, 55, 80, 0.15);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(91, 192, 222, 0.2), rgba(51, 142, 218, 0.2));
+            border: 1px solid rgba(91, 192, 222, 0.3);
+            box-shadow: 0 4px 20px rgba(91, 192, 222, 0.15);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen text-white">
-    <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400 via-primary-600 to-primary-400 animate-pulse-slow z-50"></div>
+<body class="bg-animated min-h-screen text-white font-phantom">
+    <!-- Animated top progress bar -->
+    <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-orange via-primary-red to-primary-purple animate-pulse-glow z-50"></div>
 
-    <div class="container mx-auto px-4 py-8">
+    <!-- Floating background elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-orange/10 rounded-full blur-3xl float-element"></div>
+        <div class="absolute top-3/4 right-1/4 w-48 h-48 bg-primary-purple/10 rounded-full blur-3xl float-element" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-24 h-24 bg-primary-red/10 rounded-full blur-3xl float-element" style="animation-delay: -1s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 relative z-10">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-4 p-4 rounded-lg
-                        {% if category == 'error' %}bg-red-600
-                        {% elif category == 'success' %}bg-emerald-600
-                        {% else %}bg-slate-700{% endif %} text-white shadow-md">
-                        {{ message }}
+                    <div class="mb-6 p-5 rounded-2xl backdrop-blur-lg border fade-in
+                        {% if category == 'error' %}alert-error
+                        {% elif category == 'success' %}alert-success
+                        {% else %}alert-info{% endif %} text-white shadow-lg">
+                        <div class="flex items-center">
+                            <i class="bx 
+                                {% if category == 'error' %}bx-error-circle text-primary-red
+                                {% elif category == 'success' %}bx-check-circle text-primary-green
+                                {% else %}bx-info-circle text-primary-cyan{% endif %} 
+                                text-xl mr-3"></i>
+                            <span class="font-medium">{{ message }}</span>
+                        </div>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}
+    </div>
+
+    <!-- Optional: Add some sparkle effects -->
+    <div class="fixed inset-0 pointer-events-none z-5">
+        <div class="absolute top-20 left-10 w-1 h-1 bg-primary-yellow rounded-full animate-ping" style="animation-delay: 1s;"></div>
+        <div class="absolute top-40 right-20 w-1 h-1 bg-primary-cyan rounded-full animate-ping" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-32 left-20 w-1 h-1 bg-primary-green rounded-full animate-ping" style="animation-delay: 3s;"></div>
+        <div class="absolute bottom-20 right-10 w-1 h-1 bg-primary-orange rounded-full animate-ping" style="animation-delay: 4s;"></div>
     </div>
 
 </body>
