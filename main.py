@@ -711,8 +711,7 @@ def create_log():
             project_name = request.form.get('project_name')
             title = request.form.get('title')
             what_did = request.form.get('what_did')
-            could_improve = request.form.get('could_improve')
-            can_improve = request.form.get('can_improve')
+            issues_faced = request.form.get('issues_faced')  # ADD THIS LINE
             next_steps = request.form.get('next_steps')
             time_spent = int(request.form.get('time_spent', 0))
             
@@ -748,8 +747,7 @@ def create_log():
                 'project_tag': project_tag,
                 'title': title,
                 'what_did': what_did,
-                'could_improve': could_improve,
-                'can_improve': can_improve,
+                'issues_faced': issues_faced,
                 'next_steps': next_steps,
                 'time_spent': time_spent,
                 'media_url': media_url,
