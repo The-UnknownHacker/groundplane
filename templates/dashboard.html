@@ -137,7 +137,6 @@
 </div>
 
 <script>
-// Update current time
 function updateTime() {
     const now = new Date();
     const options = { 
@@ -151,7 +150,6 @@ function updateTime() {
 updateTime();
 setInterval(updateTime, 60000);
 
-// View toggle functionality
 let isGridView = true;
 document.getElementById('grid-view').addEventListener('click', () => {
     isGridView = true;
@@ -171,7 +169,6 @@ document.getElementById('list-view').addEventListener('click', () => {
     updateProjectsDisplay();
 });
 
-// Sort functionality
 document.getElementById('sort-projects').addEventListener('change', (e) => {
     sortProjects(e.target.value);
 });
@@ -272,7 +269,7 @@ function renderProjects(projects) {
                 </div>
                 <h3 class="text-2xl font-bold text-white mb-2">No Projects Yet</h3>
                 <p class="text-gray-300 text-lg mb-6">Start your development journey by creating your first project!</p>
-                <a href="{{ url_for('create_project') }}" class="btn-primary inline-flex items-center gap-2 px-8 py-3 text-white rounded-lg font-semibold bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <a href="{{ url_for('create_project_page') }}" class="btn-primary inline-flex items-center gap-2 px-8 py-3 text-white rounded-lg font-semibold bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
                     <i class='bx bx-plus animate-bounce'></i> Create Your First Project
                 </a>
             </div>
@@ -323,7 +320,6 @@ function renderProjects(projects) {
             `;
         }).join('');
     } else {
-        // List view
         container.innerHTML = projects.map((project, index) => {
             const projectTag = project.fields['Project Tag'];
             const tagColor = getTagColor(projectTag);
@@ -367,9 +363,8 @@ fetch('/api/projects')
     .then(projects => {
         allProjects = projects;
         
-        // Update stats
         document.getElementById('total-projects').textContent = projects.length;
-        document.getElementById('active-projects').textContent = projects.length; // Assuming all are active
+        document.getElementById('active-projects').textContent = projects.length;
         document.getElementById('latest-project').textContent = projects.length > 0 ? projects[0].fields['Project Name'] : 'None';
         
         renderProjects(projects);

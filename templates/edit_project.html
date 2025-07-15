@@ -61,7 +61,6 @@ fetch(`/api/projects/${recordId}`)
         
         document.getElementById('project_name').value = data.fields['Project Name'] || '';
         document.getElementById('description').value = data.fields['Description'] || '';
-        // Removed: document.getElementById('status').value = data.fields['Status'] || 'Active';
     })
     .catch(error => {
         console.error('Error:', error);
@@ -92,7 +91,6 @@ document.getElementById('edit-project-form').addEventListener('submit', function
     const projectData = {
         project_name: document.getElementById('project_name').value,
         description: document.getElementById('description').value
-        // Removed: status: document.getElementById('status').value
     };
     
     fetch(`/api/projects/${recordId}`, {

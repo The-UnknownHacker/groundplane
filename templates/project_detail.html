@@ -67,7 +67,7 @@
                             </div>
                             <div class="flex items-center gap-1">
                                 <i class='bx bx-time text-green-400'></i>
-                                <span class="text-gray-300"><span id="total-time">0</span> min</span>
+                                <span class="text-gray-300"><span id="total-time">0</span> hrs</span>
                             </div>
                         </div>
                     </div>
@@ -154,10 +154,11 @@ function getTagColor(tag) {
 
 function updateStats() {
     const totalLogs = allLogs.length;
-    const totalTime = allLogs.reduce((sum, log) => sum + (parseInt(log.fields['Time Spent (minutes)']) || 0), 0);
+    const totalMinutes = allLogs.reduce((sum, log) => sum + (parseInt(log.fields['Time Spent (minutes)']) || 0), 0);
+    const totalHours = (totalMinutes / 60).toFixed(1);
     
     document.getElementById('total-logs').textContent = totalLogs;
-    document.getElementById('total-time').textContent = totalTime;
+    document.getElementById('total-time').textContent = totalHours;
     
     if (totalLogs > 0) {
         document.getElementById('logs-stats').classList.remove('hidden');
@@ -173,6 +174,8 @@ function filterAndSortLogs() {
         console.log("title is", title); // i hate this issue
         const whatIDid = log.fields['What I Did'] || log.fields['what_did'] || '';
         const projectTag = log.fields['Project Tag'] || log.fields['project_tag'] || '';
+        const issuesFaced = log.fields['Issues Faced'] || log.fields['issues_faced'] || '';
+        const next_steps = log.fields['Next Steps'] || log.fields['next_steps'] || '';
         
         const matchesSearch = !searchTerm || 
             title.toLowerCase().includes(searchTerm) ||
@@ -222,14 +225,24 @@ function renderLogs() {
     }
     
     container.innerHTML = filteredLogs.map((log, index) => {
-        // Add null/undefined checks for all fields - FIXED: Now properly extracting Title field
         const title = log.fields['Title'] || log.fields['title'] || 'Untitled Log';
         const projectTag = log.fields['Project Tag'] || log.fields['project_tag'] || 'General';
         const whatIDid = log.fields['What I Did'] || log.fields['what_did'] || 'No description provided';
-        const timeSpent = log.fields['Time Spent (minutes)'] || log.fields['time_spent'] || '0';
+        const next_steps = log.fields['Next Steps'] || log.fields['next_steps'] || 'No description provided';
+        const timeSpentMinutes = log.fields['Time Spent (minutes)'] || log.fields['time_spent'] || '0';
+        const timeSpentHours = (parseInt(timeSpentMinutes) / 60).toFixed(1);
         const mediaURL = log.fields['Media URL'] || log.fields['media_url'] || '';
         const createdAt = log.fields['Created At'] || log.fields['created_at'] || '';
+        const issuesFaced = log.fields['Issues Faced'] || log.fields['issues_faced'] || '';
+        const status = log.fields['Status'] || 'Pending';
         
+        const statusColors = {
+            'Approved': 'bg-green-500',
+            'Denied': 'bg-red-500',
+            'Pending': 'bg-yellow-500'
+        };
+        
+        const statusColor = statusColors[status] || 'bg-yellow-500';
         const tagColor = getTagColor(projectTag);
         const createdDate = createdAt ? formatDate(createdAt) : '';
         const animationDelay = index < 5 ? `animate__delay-${index+1}s` : '';
@@ -240,6 +253,7 @@ function renderLogs() {
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-3">
                         <span class="${tagColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">${projectTag}</span>
+                        <span class="${statusColor} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">${status}</span>
                         <span class="text-gray-400 text-sm flex items-center gap-1">
                             <i class='bx bx-time'></i>
                             ${createdDate}
@@ -250,7 +264,7 @@ function renderLogs() {
                 <div class="flex items-center gap-4">
                     <div class="flex items-center bg-slate-800/70 px-4 py-2 rounded-full border border-slate-700">
                         <i class='bx bx-stopwatch text-primary-400 mr-2'></i>
-                        <span class="text-gray-200 text-sm font-medium">${timeSpent} min</span>
+                        <span class="text-gray-200 text-sm font-medium">${timeSpentHours} hrs</span>
                     </div>
                     <div class="flex space-x-2">
                         <a href="/edit-log?id=${log.id}" class="text-blue-400 hover:text-blue-300 bg-slate-800/70 p-2 rounded-full transition-all duration-300 hover:bg-slate-700 hover:scale-110" title="Edit log">
@@ -269,6 +283,22 @@ function renderLogs() {
                     <h4 class="text-primary-300 font-medium">What I Did</h4>
                 </div>
                 <p class="text-white leading-relaxed">${whatIDid}</p>
+            </div>
+            
+            <div class="bg-slate-800/30 p-6 rounded-xl mb-4 border border-slate-700/50">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class='bx bx-right-arrow-alt text-primary-400'></i>
+                    <h4 class="text-primary-300 font-medium">Next Steps</h4>
+                </div>
+                <p class="text-white leading-relaxed">${next_steps}</p>
+            </div>
+
+            <div class="bg-slate-800/30 p-6 rounded-xl mb-4 border border-slate-700/50">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class='bx bx-error-circle text-primary-400'></i>
+                    <h4 class="text-primary-300 font-medium">Issues Faced</h4>
+                </div>
+                <p class="text-white leading-relaxed">${issuesFaced}</p>
             </div>
             
             ${mediaURL ? `
@@ -301,7 +331,6 @@ function renderLogs() {
 }).join('');
 }
 
-// Load project details
 fetch(`/api/projects/${projectId}`)
     .then(response => {
         if (!response.ok) {
@@ -381,7 +410,6 @@ function deleteLog(logId) {
         if (!response.ok) {
             throw new Error('Failed to delete log');
         }
-        // Remove from local arrays and re-render
         allLogs = allLogs.filter(log => log.id !== logId);
         filterAndSortLogs();
         updateStats();
@@ -392,7 +420,6 @@ function deleteLog(logId) {
     });
 }
 
-// Load logs
 fetch(`/api/projects/${projectId}/logs`)
     .then(response => {
         console.log('Logs response status:', response.status);
@@ -405,7 +432,6 @@ fetch(`/api/projects/${projectId}/logs`)
         console.log('Received logs:', logs);
         console.log('Number of logs:', logs.length);
         
-        // Debug: log the structure of the first log if available
         if (logs.length > 0) {
             console.log('First log structure:', logs[0]);
             console.log('First log fields:', logs[0].fields);
@@ -414,7 +440,6 @@ fetch(`/api/projects/${projectId}/logs`)
         allLogs = logs;
         filteredLogs = [...logs];
         
-        // Populate tag filter
         const tagFilter = document.getElementById('tag-filter');
         const uniqueTags = [...new Set(logs.map(log => log.fields['Project Tag']).filter(Boolean))];
         console.log('Unique tags:', uniqueTags);
@@ -426,7 +451,6 @@ fetch(`/api/projects/${projectId}/logs`)
             tagFilter.appendChild(option);
         });
         
-        // Show controls if there are logs
         if (logs.length > 0) {
             document.getElementById('log-controls').classList.remove('hidden');
         }
@@ -434,7 +458,6 @@ fetch(`/api/projects/${projectId}/logs`)
         updateStats();
         filterAndSortLogs();
         
-        // Update empty state create log button
         fetch(`/api/projects/${projectId}`)
             .then(response => response.json())
             .then(project => {
@@ -464,7 +487,6 @@ fetch(`/api/projects/${projectId}/logs`)
         `;
     });
 
-// Also add this function to help debug the filtering
 function debugFilterAndSort() {
     console.log('All logs:', allLogs);
     console.log('Filtered logs:', filteredLogs);
@@ -473,15 +495,10 @@ function debugFilterAndSort() {
     console.log('Current sort order:', sortOrder);
 }
 
-// Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
     document.getElementById('log-search').addEventListener('input', filterAndSortLogs);
-    
-    // Tag filter
     document.getElementById('tag-filter').addEventListener('change', filterAndSortLogs);
     
-    // Sort toggle
     document.getElementById('sort-toggle').addEventListener('click', function() {
         sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
         this.innerHTML = `

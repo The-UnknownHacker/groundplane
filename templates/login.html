@@ -3,25 +3,105 @@
 {% block title %}Login - Grounded Tracker{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-screen">
-    <div class="glass-card p-8 max-w-md w-full text-center animate__animated animate__fadeIn">
-        <div class="mb-8">
+<!-- Add Hack Club fonts and theme -->
+<style>
+  @font-face {
+    font-family: 'Phantom Sans';
+    src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff') format('woff'),
+         url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Phantom Sans';
+    src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff') format('woff'),
+         url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  :root {
+    --red: #ec3750;
+    --orange: #ff8c37;
+    --yellow: #f1c40f;
+    --green: #33d6a6;
+    --cyan: #5bc0de;
+    --blue: #338eda;
+    --purple: #a633d6;
+  }
+  
+  .login-container {
+    font-family: 'Phantom Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  .hack-gradient {
+    background: linear-gradient(90deg, var(--orange), var(--red));
+  }
+  
+  .hack-btn {
+    background: linear-gradient(90deg, var(--orange), var(--red));
+    transition: all 0.2s ease;
+    transform: scale(1);
+  }
+  
+  .hack-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(236, 55, 80, 0.3);
+  }
+  
+  .hack-text-gradient {
+    background: linear-gradient(90deg, var(--orange), var(--red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .hack-card {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    transition: all 0.2s ease;
+    border: none;
+  }
+  
+  .hack-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.3);
+  }
+</style>
+
+<div class="flex items-center justify-center min-h-screen login-container">
+    <div class="hack-card p-8 max-w-md w-full text-center animate__animated animate__fadeIn relative overflow-hidden">
+        <!-- Decorative elements inspired by Hack Club -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full translate-x-16 -translate-y-16 blur-xl"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full -translate-x-16 translate-y-16 blur-xl"></div>
+        
+        <div class="mb-8 relative z-10">
             <div class="flex justify-center mb-4">
-                <div class="bg-primary-500 bg-opacity-20 p-4 rounded-full">
-                    <i class='bx bx-code-block text-5xl text-primary-400'></i>
+                <div class="hack-gradient p-4 rounded-full">
+                    <i class='bx bx-time-five text-5xl text-white'></i>
                 </div>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Grounded Tracker</h1>
+            <h1 class="text-3xl font-bold hack-text-gradient mb-2">Grounded Tracker</h1>
             <p class="text-slate-300">Track your development journey and reflect on your progress</p>
         </div>
 
-        <a href="{{ auth_url }}" class="btn-primary inline-flex items-center justify-center px-8 py-3 text-white font-semibold rounded-lg shadow-lg hover:shadow-primary-500/20 transition-all duration-300 animate__animated animate__pulse animate__delay-1s">
+        <a href="{{ auth_url }}" class="hack-btn inline-flex items-center justify-center px-8 py-3 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 animate__animated animate__pulse animate__delay-1s">
             <i class='bx bxl-slack text-xl mr-2'></i> Login with Slack
         </a>
         
-        <p class="text-slate-400 text-sm mt-8 animate__animated animate__fadeIn animate__delay-2s">
+        <p class="text-slate-400 text-sm mt-8 animate__animated animate__fadeIn animate__delay-2s relative z-10">
             <i class='bx bx-info-circle'></i> Securely login with your Slack account
         </p>
+        
+        <!-- Small Orpheus icon -->
+        <div class="mt-8 opacity-70">
+            <img src="https://assets.hackclub.com/icon-rounded.svg" alt="Hack Club" class="h-8 mx-auto">
+        </div>
     </div>
 </div>
 {% endblock %}
