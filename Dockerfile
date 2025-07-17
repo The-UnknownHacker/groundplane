@@ -11,4 +11,4 @@ RUN mkdir -p uploads
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--certfile", "cert.pem", "--keyfile", "privkey.pem", "main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
