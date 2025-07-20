@@ -430,13 +430,17 @@ def create_project():
     try:
         data = request.json
         
+        # Use client timestamp if provided, otherwise use server time
+        client_timestamp = data.get('client_timestamp')
+        created_at = client_timestamp if client_timestamp else datetime.now().isoformat()
+        
         project_data = {
             'user_id': session['user_id'],
             'user_name': session['user_name'],
             'project_name': data.get('project_name'),
             'description': data.get('description'),
             'github_link': data.get('github_link'),
-            'created_at': datetime.now().isoformat()
+            'created_at': created_at
         }
         
         result = save_project_to_airtable(project_data)
@@ -561,6 +565,7 @@ def create_project_page():
             project_name = request.form.get('project_name')
             description = request.form.get('description')
             github_link = request.form.get('github_link')
+            client_timestamp = request.form.get('client_timestamp')
             
             cover_image_url = request.url_root.rstrip('/') + '/default_cover.png'
             
@@ -591,6 +596,9 @@ def create_project_page():
                         if os.path.exists(temp_file_path):
                             os.remove(temp_file_path)
             
+            # Use client timestamp if provided, otherwise use server time
+            created_at = client_timestamp if client_timestamp else datetime.now().isoformat()
+            
             project_data = {
                 'user_id': session['user_id'],
                 'user_name': session['user_name'],
@@ -598,7 +606,7 @@ def create_project_page():
                 'description': description,
                 'github_link': github_link,
                 'cover_image_url': cover_image_url,
-                'created_at': datetime.now().isoformat()
+                'created_at': created_at
             }
             
             airtable_result = save_project_to_airtable(project_data)
@@ -700,7 +708,6 @@ def logout():
 
 @app.route('/create-log', methods=['GET', 'POST'])
 @login_required
-
 def create_log():
     project_name = request.args.get('project', '')
     project_tag = request.args.get('project_tag', '')
@@ -711,9 +718,10 @@ def create_log():
             project_name = request.form.get('project_name')
             title = request.form.get('title')
             what_did = request.form.get('what_did')
-            issues_faced = request.form.get('issues_faced')  # ADD THIS LINE I DIED TRYING TO TROUBLESHOOT THIS
+            issues_faced = request.form.get('issues_faced')
             next_steps = request.form.get('next_steps')
             time_spent = int(request.form.get('time_spent', 0))
+            client_timestamp = request.form.get('client_timestamp')
             
             media_url = ''
             if 'media_file' in request.files:
@@ -740,6 +748,9 @@ def create_log():
                         if os.path.exists(temp_file_path):
                             os.remove(temp_file_path)
             
+            # Use client timestamp if provided, otherwise use server time
+            created_at = client_timestamp if client_timestamp else datetime.now().isoformat()
+            
             log_data = {
                 'user_id': session['user_id'],
                 'user_name': session['user_name'],
@@ -751,7 +762,7 @@ def create_log():
                 'next_steps': next_steps,
                 'time_spent': time_spent,
                 'media_url': media_url,
-                'created_at': datetime.now().isoformat(),
+                'created_at': created_at,
                 'status': 'Pending'  # Set default status to Pending cause project pending
             }
             

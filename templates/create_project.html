@@ -320,7 +320,10 @@
     </div>
     
     <div class="form-container">
-        <form method="POST" action="{{ url_for('create_project_page') }}" enctype="multipart/form-data">
+        <form id="projectForm" method="POST" enctype="multipart/form-data" class="space-y-8">
+            <!-- Add a hidden input field for client timestamp -->
+            <input type="hidden" name="client_timestamp" id="client_timestamp">
+            
             <div class="form-group">
                 <label for="project_name" class="form-label">Project Name</label>
                 <input type="text" id="project_name" name="project_name" required 
@@ -394,6 +397,11 @@
             submitBtn.innerHTML = '⏳ Creating...';
             submitBtn.disabled = true;
         });
+    });
+    
+    // Set the client's current timestamp when the form is submitted
+    document.getElementById('projectForm').addEventListener('submit', function() {
+        document.getElementById('client_timestamp').value = new Date().toISOString();
     });
 </script>
 {% endblock %}

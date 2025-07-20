@@ -457,4 +457,17 @@
           
         });
     </script>
+    <form id="logForm" method="POST" enctype="multipart/form-data" class="space-y-8">
+        <!-- Add a hidden input field for client timestamp -->
+        <input type="hidden" name="client_timestamp" id="client_timestamp">
+        
+        <!-- ... existing form fields ... -->
+        
+        <script>
+            // Set the client's current timestamp when the form is submitted
+            document.getElementById('logForm').addEventListener('submit', function() {
+                document.getElementById('client_timestamp').value = new Date().toISOString();
+            });
+        </script>
+    </form>
 {% endblock %}
