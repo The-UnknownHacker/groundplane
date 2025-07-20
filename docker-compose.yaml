@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"  
+    volumes:
+      - ./uploads:/app/uploads
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`groundplane.hackclub.com`)"
+      - "traefik.http.routers.web.entrypoints=http,https"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.web.loadbalancer.server.port=5000"
+      - "coolify.managed=true"
+      - "coolify.proxy=true"
+
+networks:
+  coolify:
+    external: true
