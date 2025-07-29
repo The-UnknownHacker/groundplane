@@ -373,6 +373,9 @@ fetch(`/api/projects/${projectId}`)
                 <a href="/edit-project?id=${project.id}" class="glass-card hover:bg-orange-500/10 px-6 py-3 text-white rounded-xl flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:rotate-1 border border-orange-500/30 hover:border-orange-500/50">
                     <i class='bx bx-edit'></i> Edit Project
                 </a>
+                <a href="/api/projects/${project.id}/export-markdown" class="glass-card hover:bg-emerald-500/10 px-6 py-3 text-white rounded-xl flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:rotate-1 border border-emerald-500/30 hover:border-emerald-500/50">
+                    <i class='bx bx-download'></i> Export Devlogs
+                </a>
             </div>
         `;
         
