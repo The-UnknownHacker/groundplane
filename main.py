@@ -232,6 +232,16 @@ def save_to_airtable(log_data):
 def get_logs():
     """Get user's dev logs from Airtable using Personal Access Token"""
     try:
+        # Check if we should use cached data
+        user_settings = get_user_settings(session['user_id'])
+        use_static_props = user_settings.get('use_static_props', False)
+        
+        # If static props is enabled and we have cached data, use it
+        if use_static_props and 'logs_cache' in session:
+            logger.info("Using cached logs data")
+            return jsonify(session['logs_cache'])
+        
+        # Otherwise fetch from Airtable
         url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
         headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
         
@@ -245,7 +255,14 @@ def get_logs():
         
         if response.status_code == 200:
             data = response.json()
-            return jsonify(data['records'])
+            records = data['records']
+            
+            # Cache the data if static props is enabled
+            if use_static_props:
+                session['logs_cache'] = records
+                logger.info("Cached logs data")
+            
+            return jsonify(records)
         else:
             logger.error(f"Airtable fetch failed: {response.text}")
             return jsonify([])
@@ -275,6 +292,10 @@ def delete_log(record_id):
         delete_response = requests.delete(url, headers=headers)
         
         if delete_response.status_code == 200:
+            # Clear logs cache when a log is deleted
+            if 'logs_cache' in session:
+                session.pop('logs_cache')
+                logger.info("Cleared logs cache after deleting log")
             return jsonify({"success": True, "message": "Log deleted successfully"})
         else:
             logger.error(f"Airtable delete failed: {delete_response.text}")
@@ -349,6 +370,10 @@ def update_log(record_id):
         update_response = requests.patch(url, headers=headers, json=update_payload)
         
         if update_response.status_code == 200:
+            # Clear logs cache when a log is updated
+            if 'logs_cache' in session:
+                session.pop('logs_cache')
+                logger.info("Cleared logs cache after updating log")
             return jsonify({"success": True, "message": "Log updated successfully", "data": update_response.json()})
         else:
             logger.error(f"Airtable update failed: {update_response.text}")
@@ -403,6 +428,16 @@ def save_project_to_airtable(project_data):
 def get_projects():
     """Get user's projects from Airtable"""
     try:
+        # Check if we should use cached data
+        user_settings = get_user_settings(session['user_id'])
+        use_static_props = user_settings.get('use_static_props', False)
+        
+        # If static props is enabled and we have cached data, use it
+        if use_static_props and 'projects_cache' in session:
+            logger.info("Using cached projects data")
+            return jsonify(session['projects_cache'])
+        
+        # Otherwise fetch from Airtable
         url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}"
         headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
         
@@ -416,7 +451,14 @@ def get_projects():
         
         if response.status_code == 200:
             data = response.json()
-            return jsonify(data['records'])
+            records = data['records']
+            
+            # Cache the data if static props is enabled
+            if use_static_props:
+                session['projects_cache'] = records
+                logger.info("Cached projects data")
+            
+            return jsonify(records)
         else:
             logger.error(f"Airtable fetch failed: {response.text}")
             return jsonify([])
@@ -447,6 +489,10 @@ def create_project():
         result = save_project_to_airtable(project_data)
         
         if result:
+            # Clear projects cache when a new project is created
+            if 'projects_cache' in session:
+                session.pop('projects_cache')
+                logger.info("Cleared projects cache after creating new project")
             return jsonify({"success": True, "message": "Project created successfully", "data": result})
         else:
             return jsonify({"success": False, "message": "Failed to create project"}), 500
@@ -518,6 +564,10 @@ def update_project(record_id):
         update_response = requests.patch(url, headers=headers, json=update_payload)
         
         if update_response.status_code == 200:
+            # Clear projects cache when a project is updated
+            if 'projects_cache' in session:
+                session.pop('projects_cache')
+                logger.info("Cleared projects cache after updating project")
             return jsonify({"success": True, "message": "Project updated successfully", "data": update_response.json()})
         else:
             logger.error(f"Airtable update failed: {update_response.text}")
@@ -548,6 +598,10 @@ def delete_project(record_id):
         delete_response = requests.delete(url, headers=headers)
         
         if delete_response.status_code == 200:
+            # Clear projects cache when a project is deleted
+            if 'projects_cache' in session:
+                session.pop('projects_cache')
+                logger.info("Cleared projects cache after deleting project")
             return jsonify({"success": True, "message": "Project deleted successfully"})
         else:
             logger.error(f"Airtable delete failed: {delete_response.text}")
@@ -612,6 +666,10 @@ def create_project_page():
             airtable_result = save_project_to_airtable(project_data)
             
             if airtable_result:
+                # Clear projects cache when a new project is created via form
+                if 'projects_cache' in session:
+                    session.pop('projects_cache')
+                    logger.info("Cleared projects cache after creating new project via form")
                 flash('Project created successfully!', 'success')
                 return redirect(url_for('index'))
             else:
@@ -652,7 +710,9 @@ def get_user_settings(user_id):
         'record_id': None,
         'enable_animations': True,
         'reduced_motion': False,
-        'project_reminders': True
+        'project_reminders': True,
+        'use_static_props': False,
+        'last_refreshed': None
     }
     
     # Try to get from Airtable if configured
@@ -678,7 +738,9 @@ def get_user_settings(user_id):
                         'record_id': records[0]['id'],
                         'enable_animations': records[0]['fields'].get('Enable Animations', True),
                         'reduced_motion': records[0]['fields'].get('Reduced Motion', False),
-                        'project_reminders': records[0]['fields'].get('Project Reminders', True)
+                        'project_reminders': records[0]['fields'].get('Project Reminders', True),
+                        'use_static_props': records[0]['fields'].get('Use Static Props', False),
+                        'last_refreshed': records[0]['fields'].get('Last Refreshed', None)
                     }
                     # Store in session for future use
                     session['user_settings'] = settings
@@ -689,7 +751,9 @@ def get_user_settings(user_id):
                         'User ID': user_id,
                         'Enable Animations': True,
                         'Reduced Motion': False,
-                        'Project Reminders': True
+                        'Project Reminders': True,
+                        'Use Static Props': False,
+                        'Last Refreshed': None
                     }
                     
                     create_data = {
@@ -707,7 +771,9 @@ def get_user_settings(user_id):
                             'record_id': result['id'],
                             'enable_animations': True,
                             'reduced_motion': False,
-                            'project_reminders': True
+                            'project_reminders': True,
+                            'use_static_props': False,
+                            'last_refreshed': None
                         }
                         # Store in session for future use
                         session['user_settings'] = settings
@@ -733,7 +799,9 @@ def save_user_settings(user_id, settings):
         'record_id': None,  # Will be updated if Airtable save is successful
         'enable_animations': settings.get('enable_animations', True),
         'reduced_motion': settings.get('reduced_motion', False),
-        'project_reminders': settings.get('project_reminders', True)
+        'project_reminders': settings.get('project_reminders', True),
+        'use_static_props': settings.get('use_static_props', False),
+        'last_refreshed': settings.get('last_refreshed', None)
     }
     
     # Save to session
@@ -759,7 +827,9 @@ def save_user_settings(user_id, settings):
                     'fields': {
                         'Enable Animations': settings.get('enable_animations', True),
                         'Reduced Motion': settings.get('reduced_motion', False),
-                        'Project Reminders': settings.get('project_reminders', True)
+                        'Project Reminders': settings.get('project_reminders', True),
+                        'Use Static Props': settings.get('use_static_props', False),
+                        'Last Refreshed': settings.get('last_refreshed', None)
                     }
                 }
                 
@@ -781,7 +851,9 @@ def save_user_settings(user_id, settings):
                         'User ID': user_id,
                         'Enable Animations': settings.get('enable_animations', True),
                         'Reduced Motion': settings.get('reduced_motion', False),
-                        'Project Reminders': settings.get('project_reminders', True)
+                        'Project Reminders': settings.get('project_reminders', True),
+                        'Use Static Props': settings.get('use_static_props', False),
+                        'Last Refreshed': settings.get('last_refreshed', None)
                     }
                 }
                 
@@ -811,7 +883,7 @@ def inject_user_settings():
     """Inject user settings into all templates"""
     if 'user_id' in session:
         return {'user_settings': get_user_settings(session['user_id'])}
-    return {'user_settings': {'enable_animations': True, 'reduced_motion': False, 'project_reminders': True}}
+    return {'user_settings': {'enable_animations': True, 'reduced_motion': False, 'project_reminders': True, 'use_static_props': False, 'last_refreshed': None}}
 
 @app.route('/')
 def index():
@@ -835,11 +907,29 @@ def save_settings():
     reduced_motion = 'reduced_motion' in request.form
     project_reminders = 'project_reminders' in request.form
     
+    # Get use_static_props value from the hidden input
+    use_static_props_value = request.form.get('use_static_props', 'off')
+    use_static_props = (use_static_props_value == 'on')
+    
+    # Debug logging
+    logger.info(f"Form data: {dict(request.form)}")
+    logger.info(f"use_static_props value: {use_static_props_value}")
+    logger.info(f"use_static_props boolean: {use_static_props}")
+    
+    # Get current settings to preserve last_refreshed value if it exists
+    current_settings = get_user_settings(session['user_id'])
+    last_refreshed = current_settings.get('last_refreshed')
+    
     settings = {
         'enable_animations': enable_animations,
         'reduced_motion': reduced_motion,
-        'project_reminders': project_reminders
+        'project_reminders': project_reminders,
+        'use_static_props': use_static_props,
+        'last_refreshed': last_refreshed
     }
+    
+    # Debug logging
+    logger.info(f"Settings to save: {settings}")
     
     success = save_user_settings(session['user_id'], settings)
     
@@ -849,6 +939,31 @@ def save_settings():
         flash('Failed to save settings. Please try again.', 'error')
     
     return redirect(url_for('settings_page'))
+
+@app.route('/settings/refresh-data', methods=['POST'])
+@login_required
+def refresh_data():
+    """Refresh data from Airtable and update last_refreshed timestamp"""
+    try:
+        # Clear any cached data in session
+        if 'projects_cache' in session:
+            session.pop('projects_cache')
+        if 'logs_cache' in session:
+            session.pop('logs_cache')
+        
+        # Update the last_refreshed timestamp
+        current_settings = get_user_settings(session['user_id'])
+        current_settings['last_refreshed'] = datetime.now().isoformat()
+        
+        success = save_user_settings(session['user_id'], current_settings)
+        
+        if success:
+            return jsonify({"success": True, "message": "Data refreshed successfully", "timestamp": current_settings['last_refreshed']})
+        else:
+            return jsonify({"success": False, "message": "Failed to update refresh timestamp"}), 500
+    except Exception as e:
+        logger.error(f"Error refreshing data: {str(e)}")
+        return jsonify({"success": False, "message": "An error occurred while refreshing data"}), 500
 
 @app.route('/login')
 def login():
@@ -972,6 +1087,10 @@ def create_log():
             airtable_result = save_to_airtable(log_data)
             
             if airtable_result:
+                # Clear logs cache when a new log is created
+                if 'logs_cache' in session:
+                    session.pop('logs_cache')
+                    logger.info("Cleared logs cache after creating log")
                 flash('Dev log created successfully!', 'success')
                 return redirect(url_for('index'))
             else:
