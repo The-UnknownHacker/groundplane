@@ -222,7 +222,6 @@
             box-shadow: 0 4px 20px rgba(91, 192, 222, 0.15);
         }
     </style>
-    <!-- Apply user settings for animations -->
     {% if user_settings is defined %}
     <style>
         {% if not user_settings.enable_animations %}
@@ -245,10 +244,8 @@
     {% endif %}
 </head>
 <body class="bg-animated min-h-screen text-white font-phantom{% if user_settings is defined and not user_settings.enable_animations %} no-animations{% endif %}{% if user_settings is defined and user_settings.reduced_motion %} reduced-motion{% endif %}">
-    <!-- Animated top progress bar -->
     <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-orange via-primary-red to-primary-purple animate-pulse-glow z-50"></div>
 
-    <!-- Floating background elements -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-orange/10 rounded-full blur-3xl float-element"></div>
         <div class="absolute top-3/4 right-1/4 w-48 h-48 bg-primary-purple/10 rounded-full blur-3xl float-element" style="animation-delay: -2s;"></div>
@@ -279,7 +276,6 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Optional: Add some sparkle effects -->
     <div class="fixed inset-0 pointer-events-none z-5">
         <div class="absolute top-20 left-10 w-1 h-1 bg-primary-yellow rounded-full animate-ping" style="animation-delay: 1s;"></div>
         <div class="absolute top-40 right-20 w-1 h-1 bg-primary-cyan rounded-full animate-ping" style="animation-delay: 2s;"></div>
