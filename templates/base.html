@@ -222,8 +222,29 @@
             box-shadow: 0 4px 20px rgba(91, 192, 222, 0.15);
         }
     </style>
+    <!-- Apply user settings for animations -->
+    {% if user_settings is defined %}
+    <style>
+        {% if not user_settings.enable_animations %}
+        /* Disable animations when user has turned them off */
+        * {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+        }
+        {% endif %}
+        
+        {% if user_settings.reduced_motion %}
+        /* Reduce motion for accessibility */
+        * {
+            animation-duration: 0.001s !important;
+            transition-duration: 0.001s !important;
+        }
+        {% endif %}
+    </style>
+    {% endif %}
 </head>
-<body class="bg-animated min-h-screen text-white font-phantom">
+<body class="bg-animated min-h-screen text-white font-phantom{% if user_settings is defined and not user_settings.enable_animations %} no-animations{% endif %}{% if user_settings is defined and user_settings.reduced_motion %} reduced-motion{% endif %}">
     <!-- Animated top progress bar -->
     <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-orange via-primary-red to-primary-purple animate-pulse-glow z-50"></div>
 
