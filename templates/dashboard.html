@@ -4,9 +4,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto fade-in">
-    <!-- Top Bar with Welcome Message and Actions -->
     <div class="glass-card p-8 mb-8 animate__animated animate__fadeIn relative overflow-hidden">
-        <!-- Background Pattern -->
         <div class="absolute inset-0 opacity-10 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-purple-500/20 animate-gradient"></div>
         <div class="absolute top-0 left-0 w-40 h-40 bg-orange-400/10 rounded-full -translate-x-20 -translate-y-20 blur-xl animate-pulse"></div>
         <div class="absolute bottom-0 right-0 w-32 h-32 bg-purple-400/10 rounded-full translate-x-16 translate-y-16 blur-xl animate-pulse"></div>
@@ -42,7 +40,6 @@
         </div>
     </div>
     
-    <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="glass-card p-6 animate__animated animate__fadeIn animate__delay-1s relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/5 animate-gradient"></div>
@@ -85,7 +82,6 @@
     </div>
     
     <div class="glass-card p-8 animate__animated animate__fadeIn animate__delay-1s relative overflow-hidden">
-        <!-- Background Pattern -->
         <div class="absolute inset-0 opacity-5">
             <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-500/10 via-red-500/10 to-purple-500/10 animate-gradient"></div>
             <div class="absolute top-10 left-10 w-20 h-20 bg-orange-400/10 rounded-full blur-xl animate-pulse"></div>
@@ -101,7 +97,6 @@
                 <h2 class="text-2xl font-bold text-white bg-gradient-to-r from-orange-400 via-red-400 to-purple-400 bg-clip-text text-transparent animate-gradient">My Projects</h2>
             </div>
             
-            <!-- Filter and Sort Controls -->
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
                     <label class="text-gray-400 text-sm">Sort by:</label>
@@ -135,7 +130,6 @@
     </div>
 </div>
 
-<!-- Enhanced Floating Action Button -->
 <div class="fixed bottom-6 right-6 z-40">
     <a href="{{ url_for('create_project_page') }}" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-4 rounded-full shadow-2xl hover:shadow-orange-500/25 transform hover:scale-110 transition-all duration-300 flex items-center justify-center group glow-orange">
         <i class='bx bx-plus text-2xl group-hover:rotate-90 transition-transform duration-300'></i>

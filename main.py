@@ -700,12 +700,12 @@ def project_detail(project_id):
 
 
 def get_user_settings(user_id):
-    """Get user settings from session or Airtable"""
+    """Get user settings from session or create default settings"""
     # Check if settings are in session first
     if 'user_settings' in session:
         return session['user_settings']
     
-    # Default settings to use if Airtable fails
+    # Default settings to use
     default_settings = {
         'record_id': None,
         'enable_animations': True,
@@ -715,88 +715,16 @@ def get_user_settings(user_id):
         'last_refreshed': None
     }
     
-    # Try to get from Airtable if configured
-    if AIRTABLE_BASE_ID and AIRTABLE_API_KEY and AIRTABLE_USER_SETTINGS_TABLE:
-        try:
-            url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USER_SETTINGS_TABLE}"
-            headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
-            
-            params = {
-                'filterByFormula': f"{{User ID}} = '{user_id}'",
-                'maxRecords': 1
-            }
-            
-            response = requests.get(url, headers=headers, params=params)
-            
-            if response.status_code == 200:
-                data = response.json()
-                records = data.get('records', [])
-                
-                if records:
-                    # Return the first record's fields
-                    settings = {
-                        'record_id': records[0]['id'],
-                        'enable_animations': records[0]['fields'].get('Enable Animations', True),
-                        'reduced_motion': records[0]['fields'].get('Reduced Motion', False),
-                        'project_reminders': records[0]['fields'].get('Project Reminders', True),
-                        'use_static_props': records[0]['fields'].get('Use Static Props', False),
-                        'last_refreshed': records[0]['fields'].get('Last Refreshed', None)
-                    }
-                    # Store in session for future use
-                    session['user_settings'] = settings
-                    return settings
-                else:
-                    # Create default settings if none exist
-                    default_settings_fields = {
-                        'User ID': user_id,
-                        'Enable Animations': True,
-                        'Reduced Motion': False,
-                        'Project Reminders': True,
-                        'Use Static Props': False,
-                        'Last Refreshed': None
-                    }
-                    
-                    create_data = {
-                        'fields': default_settings_fields
-                    }
-                    
-                    create_response = requests.post(url, headers={
-                        'Authorization': f'Bearer {AIRTABLE_API_KEY}',
-                        'Content-Type': 'application/json'
-                    }, json=create_data)
-                    
-                    if create_response.status_code == 200:
-                        result = create_response.json()
-                        settings = {
-                            'record_id': result['id'],
-                            'enable_animations': True,
-                            'reduced_motion': False,
-                            'project_reminders': True,
-                            'use_static_props': False,
-                            'last_refreshed': None
-                        }
-                        # Store in session for future use
-                        session['user_settings'] = settings
-                        return settings
-                    else:
-                        logger.error(f"Failed to create default settings: {create_response.text}")
-            else:
-                logger.error(f"Failed to fetch user settings: {response.text}")
-                
-        except Exception as e:
-            logger.error(f"Error fetching user settings: {str(e)}")
-    else:
-        logger.info("Airtable settings not configured, using session storage for user settings")
-    
     # Store default settings in session
     session['user_settings'] = default_settings
+    logger.info("Created default user settings in local cache")
     return default_settings
 
 def save_user_settings(user_id, settings):
-    """Save user settings to session and Airtable if configured"""
-    # Always save to session first
+    """Save user settings to session only (local cache)"""
+    # Save to session
     session_settings = {
-        'record_id': None,  # Will be updated if Airtable save is successful
+        'record_id': None,
         'enable_animations': settings.get('enable_animations', True),
         'reduced_motion': settings.get('reduced_motion', False),
         'project_reminders': settings.get('project_reminders', True),
@@ -806,77 +734,8 @@ def save_user_settings(user_id, settings):
     
     # Save to session
     session['user_settings'] = session_settings
-    
-    # Try to save to Airtable if configured
-    if AIRTABLE_BASE_ID and AIRTABLE_API_KEY and AIRTABLE_USER_SETTINGS_TABLE:
-        try:
-            url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USER_SETTINGS_TABLE}"
-            headers = {
-                'Authorization': f'Bearer {AIRTABLE_API_KEY}',
-                'Content-Type': 'application/json'
-            }
-            
-            # First check if settings already exist
-            existing_settings = get_user_settings(user_id)
-            record_id = existing_settings.get('record_id')
-            
-            if record_id:
-                # Update existing record
-                update_url = f"{url}/{record_id}"
-                update_data = {
-                    'fields': {
-                        'Enable Animations': settings.get('enable_animations', True),
-                        'Reduced Motion': settings.get('reduced_motion', False),
-                        'Project Reminders': settings.get('project_reminders', True),
-                        'Use Static Props': settings.get('use_static_props', False),
-                        'Last Refreshed': settings.get('last_refreshed', None)
-                    }
-                }
-                
-                response = requests.patch(update_url, headers=headers, json=update_data)
-                
-                if response.status_code == 200:
-                    # Update record_id in session
-                    session_settings['record_id'] = record_id
-                    session['user_settings'] = session_settings
-                    return True
-                else:
-                    logger.error(f"Failed to update settings: {response.text}")
-                    # Session storage is already done, so just return True
-                    return True
-            else:
-                # Create new record
-                create_data = {
-                    'fields': {
-                        'User ID': user_id,
-                        'Enable Animations': settings.get('enable_animations', True),
-                        'Reduced Motion': settings.get('reduced_motion', False),
-                        'Project Reminders': settings.get('project_reminders', True),
-                        'Use Static Props': settings.get('use_static_props', False),
-                        'Last Refreshed': settings.get('last_refreshed', None)
-                    }
-                }
-                
-                response = requests.post(url, headers=headers, json=create_data)
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    # Update record_id in session
-                    session_settings['record_id'] = result['id']
-                    session['user_settings'] = session_settings
-                    return True
-                else:
-                    logger.error(f"Failed to create settings: {response.text}")
-                    # Session storage is already done, so just return True
-                    return True
-        except Exception as e:
-            logger.error(f"Error saving user settings: {str(e)}")
-            # Session storage is already done, so just return True
-            return True
-    else:
-        logger.info("Airtable settings not configured, using session storage only")
-        # Session storage is already done, so just return True
-        return True
+    logger.info("Saved user settings to local cache")
+    return True
 
 @app.context_processor
 def inject_user_settings():

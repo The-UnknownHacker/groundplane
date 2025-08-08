@@ -321,7 +321,6 @@
     
     <div class="form-container">
         <form id="projectForm" method="POST" enctype="multipart/form-data" class="space-y-8">
-            <!-- Add a hidden input field for client timestamp -->
             <input type="hidden" name="client_timestamp" id="client_timestamp">
             
             <div class="form-group">
@@ -399,7 +398,6 @@
         });
     });
     
-    // Set the client's current timestamp when the form is submitted
     document.getElementById('projectForm').addEventListener('submit', function() {
         document.getElementById('client_timestamp').value = new Date().toISOString();
     });
