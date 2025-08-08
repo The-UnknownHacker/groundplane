@@ -35,9 +35,16 @@
 
         <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
           <label class="flex items-center text-primary-300 font-semibold mb-3">
-            <i class='bx bx-info-circle mr-2'></i> Description
+            <i class='bx bx-info-circle mr-2'></i> Title
           </label>
-          <input type="text" id="description" name="description" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Brief description of your work session">
+          <input type="text" id="description" name="description" required class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Brief title of your work session">
+        </div>
+
+        <div class="bg-slate-800 bg-opacity-50 p-5 rounded-lg">
+          <label class="flex items-center text-primary-300 font-semibold mb-3">
+            <i class='bx bx-code-block mr-2'></i> What I Did
+          </label>
+          <textarea id="what_did" name="what_did" rows="4" class="w-full p-3 rounded-lg bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-300" placeholder="Tell us about your progress..."></textarea>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -123,7 +130,8 @@
       })
       .then(data => {
         document.getElementById('project_name').value = data.fields['Project Name'];
-        document.getElementById('description').value = data.fields['Description'];
+        document.getElementById('description').value = data.fields['Title'] || '';
+        document.getElementById('what_did').value = data.fields['What I Did'] || '';
         document.getElementById('issues_faced').value = data.fields['Issues Faced'] || '';
         document.getElementById('next_steps').value = data.fields['Next Steps'] || '';
         document.getElementById('time_spent').value = data.fields['Time Spent (minutes)'];
@@ -163,7 +171,8 @@
       
       const formData = {
         project_name: document.getElementById('project_name').value,
-        description: document.getElementById('description').value,
+        title: document.getElementById('description').value,
+        what_did: document.getElementById('what_did').value,
         issues_faced: document.getElementById('issues_faced').value,
         next_steps: document.getElementById('next_steps').value,
         time_spent: parseInt(document.getElementById('time_spent').value)

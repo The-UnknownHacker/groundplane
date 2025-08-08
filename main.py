@@ -355,6 +355,7 @@ def update_log(record_id):
         fields = {
             'Project Name': update_data.get('project_name'),
             'Title': update_data.get('title'),
+            'What I Did': update_data.get('what_did'),
             'Issues Faced': update_data.get('issues_faced'),
             'Next Steps': update_data.get('next_steps'),
             'Time Spent (minutes)': update_data.get('time_spent'),
