@@ -1,0 +1,171 @@
+{% extends "admin/base.html" %}
+
+{% block title %}lawg checking{% endblock %}
+
+{% block header %}lawg checking{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title">{{ log.fields['Title'] }}</h5>
+                    <div>
+                        {% if project_id %}
+                            <a href="{{ url_for('admin_project_detail', record_id=project_id) }}" class="btn btn-outline-secondary me-2">Back to Project</a>
+                        {% endif %}
+                        <a href="{{ url_for('admin_projects') }}" class="btn btn-outline-secondary">All Projects</a>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Project:</strong> {{ project_name }}</p>
+                        <p><strong>User:</strong> {{ log.fields['User Name'] }}</p>
+                        <p><strong>Created:</strong> 
+                            {% if log.fields['Created At'] %}
+                                {{ log.fields['Created At']|string|replace('T', ' ')|truncate(16, True, '') }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </p>
+                        <p>
+                            <strong>Time Spent:</strong> 
+                            {% if log.fields['Time Spent (minutes)'] %}
+                                {% set minutes = log.fields['Time Spent (minutes)']|int %}
+                                {% if minutes >= 60 %}
+                                    {{ (minutes / 60)|int }}h {{ minutes % 60 }}m
+                                {% else %}
+                                    {{ minutes }}m
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#editTimeModal">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            {% else %}
+                                -
+                                <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#editTimeModal">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            {% endif %}
+                        </p>
+                        <p>
+                            <strong>Status:</strong> 
+                            <span class="badge {{ get_status_class(log.fields['Status']) }}">
+                                {{ log.fields['Status'] or 'Pending' }}
+                            </span>
+                        </p>
+                    </div>
+
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6>Log Content:</h6>
+                        <div class="p-3 bg-light rounded">
+                            {{ log.fields['Content']|safe }}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if log.fields['Media'] %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Media:</h6>
+                            <div class="row">
+                                {% for media in log.fields['Media'] %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card">
+                                            <img src="{{ media.url }}" class="card-img-top" alt="Media">
+                                            <div class="card-body">
+                                                <a href="{{ media.url }}" target="_blank" class="btn btn-sm btn-primary">View Full Size</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% elif log.fields['Media URL'] %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Media:</h6>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <img src="{{ log.fields['Media URL'] }}" class="card-img-top" alt="Media">
+                                        <div class="card-body">
+                                            <a href="{{ log.fields['Media URL'] }}" target="_blank" class="btn btn-sm btn-primary">View Full Size</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Update Log Status:</h6>
+                        <form action="{{ url_for('admin_update_log', record_id=log.id) }}" method="POST">
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="Pending" {% if log.fields['Status'] == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="In Review" {% if log.fields['Status'] == 'In Review' %}selected{% endif %}>In Review</option>
+                                    <option value="Approved" {% if log.fields['Status'] == 'Approved' %}selected{% endif %}>Approved</option>
+                                    <option value="Rejected" {% if log.fields['Status'] == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Log</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for editing time spent -->
+<div class="modal fade" id="editTimeModal" tabindex="-1" aria-labelledby="editTimeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTimeModalLabel">Edit Time Spent</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('admin_update_log_time', record_id=log.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="time_spent" class="form-label">Time Spent (minutes)</label>
+                        <input type="number" class="form-control" id="time_spent" name="time_spent" value="{{ log.fields['Time Spent (minutes)']|default(0) }}" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function get_status_class(status) {
+        switch(status) {
+            case 'Approved':
+                return 'bg-success';
+            case 'Rejected':
+                return 'bg-danger';
+            case 'Pending':
+                return 'bg-warning';
+            case 'In Review':
+                return 'bg-info';
+            default:
+                return 'bg-secondary';
+        }
+    }
+</script>
+{% endblock %}

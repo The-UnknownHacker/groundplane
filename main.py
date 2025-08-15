@@ -29,6 +29,7 @@ AIRTABLE_BASE_ID = os.environ.get('AIRTABLE_BASE_ID')
 AIRTABLE_TABLE_NAME=os.environ.get('AIRTABLE_TABLE_NAME')
 AIRTABLE_API_KEY = os.environ.get('AIRTABLE_API_KEY')
 AIRTABLE_USER_SETTINGS_TABLE = os.environ.get('AIRTABLE_USER_SETTINGS_TABLE', 'UserSettings')
+AIRTABLE_USERS_TABLE = os.environ.get('AIRTABLE_USERS_TABLE', 'Users')
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm'}
 
@@ -45,6 +46,22 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        
+        if not session.get('is_admin', False) and not is_admin(session['user_id']):
+            flash('You do not have permission to access this page.', 'error')
+            return redirect(url_for('index'))
+            
+        if 'is_admin' not in session:
+            session['is_admin'] = True
+            
         return f(*args, **kwargs)
     return decorated_function
 
@@ -232,16 +249,13 @@ def save_to_airtable(log_data):
 def get_logs():
     """Get user's dev logs from Airtable using Personal Access Token"""
     try:
-        # Check if we should use cached data
         user_settings = get_user_settings(session['user_id'])
         use_static_props = user_settings.get('use_static_props', False)
         
-        # If static props is enabled and we have cached data, use it
         if use_static_props and 'logs_cache' in session:
             logger.info("Using cached logs data")
             return jsonify(session['logs_cache'])
         
-        # Otherwise fetch from Airtable
         url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
         headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
         
@@ -257,7 +271,6 @@ def get_logs():
             data = response.json()
             records = data['records']
             
-            # Cache the data if static props is enabled
             if use_static_props:
                 session['logs_cache'] = records
                 logger.info("Cached logs data")
@@ -292,7 +305,6 @@ def delete_log(record_id):
         delete_response = requests.delete(url, headers=headers)
         
         if delete_response.status_code == 200:
-            # Clear logs cache when a log is deleted
             if 'logs_cache' in session:
                 session.pop('logs_cache')
                 logger.info("Cleared logs cache after deleting log")
@@ -371,7 +383,6 @@ def update_log(record_id):
         update_response = requests.patch(url, headers=headers, json=update_payload)
         
         if update_response.status_code == 200:
-            # Clear logs cache when a log is updated
             if 'logs_cache' in session:
                 session.pop('logs_cache')
                 logger.info("Cleared logs cache after updating log")
@@ -429,16 +440,13 @@ def save_project_to_airtable(project_data):
 def get_projects():
     """Get user's projects from Airtable"""
     try:
-        # Check if we should use cached data
         user_settings = get_user_settings(session['user_id'])
         use_static_props = user_settings.get('use_static_props', False)
         
-        # If static props is enabled and we have cached data, use it
         if use_static_props and 'projects_cache' in session:
             logger.info("Using cached projects data")
             return jsonify(session['projects_cache'])
         
-        # Otherwise fetch from Airtable
         url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}"
         headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
         
@@ -454,7 +462,6 @@ def get_projects():
             data = response.json()
             records = data['records']
             
-            # Cache the data if static props is enabled
             if use_static_props:
                 session['projects_cache'] = records
                 logger.info("Cached projects data")
@@ -490,7 +497,6 @@ def create_project():
         result = save_project_to_airtable(project_data)
         
         if result:
-            # Clear projects cache when a new project is created
             if 'projects_cache' in session:
                 session.pop('projects_cache')
                 logger.info("Cleared projects cache after creating new project")
@@ -599,7 +605,6 @@ def delete_project(record_id):
         delete_response = requests.delete(url, headers=headers)
         
         if delete_response.status_code == 200:
-            # Clear projects cache when a project is deleted
             if 'projects_cache' in session:
                 session.pop('projects_cache')
                 logger.info("Cleared projects cache after deleting project")
@@ -702,11 +707,9 @@ def project_detail(project_id):
 
 def get_user_settings(user_id):
     """Get user settings from session or create default settings"""
-    # Check if settings are in session first
     if 'user_settings' in session:
         return session['user_settings']
     
-    # Default settings to use
     default_settings = {
         'record_id': None,
         'enable_animations': True,
@@ -716,7 +719,6 @@ def get_user_settings(user_id):
         'last_refreshed': None
     }
     
-    # Store default settings in session
     session['user_settings'] = default_settings
     logger.info("Created default user settings in local cache")
     return default_settings
@@ -733,17 +735,493 @@ def save_user_settings(user_id, settings):
         'last_refreshed': settings.get('last_refreshed', None)
     }
     
-    # Save to session
     session['user_settings'] = session_settings
     logger.info("Saved user settings to local cache")
     return True
 
+def get_status_class(status):
+    """Return the appropriate CSS class for a status badge"""
+    if status == 'Approved':
+        return 'bg-success'
+    elif status == 'Rejected':
+        return 'bg-danger'
+    elif status == 'Pending':
+        return 'bg-warning'
+    elif status == 'In Review':
+        return 'bg-info'
+    else:
+        return 'bg-secondary'
+
 @app.context_processor
 def inject_user_settings():
     """Inject user settings into all templates"""
+    context = {}
     if 'user_id' in session:
-        return {'user_settings': get_user_settings(session['user_id'])}
-    return {'user_settings': {'enable_animations': True, 'reduced_motion': False, 'project_reminders': True, 'use_static_props': False, 'last_refreshed': None}}
+        context['user_settings'] = get_user_settings(session['user_id'])
+        context['is_admin'] = session.get('is_admin', False)
+    else:
+        context['user_settings'] = {'enable_animations': True, 'reduced_motion': False, 'project_reminders': True, 'use_static_props': False, 'last_refreshed': None}
+        context['is_admin'] = False
+    
+    context['get_status_class'] = get_status_class
+    return context
+
+def get_user_from_airtable(user_id):
+    """Get user from Airtable Users table"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USERS_TABLE}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        params = {
+            'filterByFormula': f"{{User ID}} = '{user_id}'"
+        }
+        
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('records') and len(data['records']) > 0:
+                return data['records'][0]
+            else:
+                return None
+        else:
+            logger.error(f"Airtable user fetch failed: {response.text}")
+            return None
+            
+    except Exception as e:
+        logger.error(f"Error fetching user: {str(e)}")
+        return None
+
+def get_all_users():
+    """Get all users from Airtable Users table"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USERS_TABLE}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data.get('records', [])
+        else:
+            logger.error(f"Airtable users fetch failed: {response.text}")
+            return []
+            
+    except Exception as e:
+        logger.error(f"Error fetching users: {str(e)}")
+        return []
+
+def save_user_to_airtable(user_data):
+    """Save user to Airtable Users table"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USERS_TABLE}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            'fields': user_data
+        }
+        
+        response = requests.post(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"Airtable user save failed: {response.text}")
+            return None
+    except Exception as e:
+        logger.error(f"Error saving user: {str(e)}")
+        return None
+
+def update_user_in_airtable(record_id, user_data):
+    """Update user in Airtable Users table"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USERS_TABLE}/{record_id}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            'fields': user_data
+        }
+        
+        response = requests.patch(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"Airtable user update failed: {response.text}")
+            return None
+    except Exception as e:
+        logger.error(f"Error updating user: {str(e)}")
+        return None
+
+def is_admin(user_id):
+    """Check if user is an admin"""
+    user = get_user_from_airtable(user_id)
+    admin_value = user.get('fields', {}).get('Is Admin', 'false') if user else 'false'
+    return admin_value is True or admin_value == True or admin_value == 'true'
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    """Admin dashboard home page"""
+    return render_template('admin/dashboard.html')
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    """Admin users management page"""
+    users = get_all_users()
+    return render_template('admin/users.html', users=users)
+
+@app.route('/admin/users/<record_id>/projects')
+@admin_required
+def admin_user_projects(record_id):
+    """Admin user projects page"""
+    try:
+        user_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USERS_TABLE}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        user_response = requests.get(user_url, headers=headers)
+        
+        if user_response.status_code != 200:
+            logger.error(f"Failed to fetch user: {user_response.text}")
+            flash('User not found', 'error')
+            return redirect(url_for('admin_users'))
+        
+        user_data = user_response.json()
+        user_name = user_data['fields']['User Name']
+        
+        projects_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}"
+        
+        params = {
+            'filterByFormula': f"{{User Name}} = '{user_name}'",
+            'sort[0][field]': 'Created At',
+            'sort[0][direction]': 'desc'
+        }
+        
+        projects_response = requests.get(projects_url, headers=headers, params=params)
+        
+        if projects_response.status_code == 200:
+            projects_data = projects_response.json()
+            projects = projects_data.get('records', [])
+            return render_template('admin/user_projects.html', user=user_data, projects=projects)
+        else:
+            logger.error(f"Airtable projects fetch failed: {projects_response.text}")
+            flash('Failed to fetch user projects', 'warning')
+            return render_template('admin/user_projects.html', user=user_data, projects=[])
+    except Exception as e:
+        logger.error(f"Error fetching user projects: {str(e)}")
+        flash('An error occurred while fetching user projects', 'error')
+        return redirect(url_for('admin_users'))
+
+@app.route('/admin/users/<record_id>/toggle-admin', methods=['POST'])
+@admin_required
+def admin_toggle_user_admin(record_id):
+    """Toggle admin status for a user"""
+    try:
+        is_admin_value = request.form.get('is_admin')
+        
+        is_admin_str = 'true' if is_admin_value == 'True' else 'false'
+        
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_USERS_TABLE}/{record_id}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        update_payload = {
+            'fields': {
+                'Is Admin': is_admin_str
+            }
+        }
+        
+        response = requests.patch(url, headers=headers, json=update_payload)
+        
+        if response.status_code == 200:
+            flash('User admin status updated successfully', 'success')
+        else:
+            logger.error(f"Airtable user update failed: {response.text}")
+            flash('Failed to update user admin status', 'error')
+            
+    except Exception as e:
+        logger.error(f"Error updating user admin status: {str(e)}")
+        flash('An error occurred while updating user admin status', 'error')
+        
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/projects')
+@admin_required
+def admin_projects():
+    """Admin projects management page"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            projects = data.get('records', [])
+            return render_template('admin/projects.html', projects=projects)
+        else:
+            logger.error(f"Airtable projects fetch failed: {response.text}")
+            flash('Failed to fetch projects', 'error')
+            return render_template('admin/projects.html', projects=[])
+            
+    except Exception as e:
+        logger.error(f"Error fetching projects: {str(e)}")
+        flash('An error occurred while fetching projects', 'error')
+        return render_template('admin/projects.html', projects=[])
+
+@app.route('/admin/projects/<record_id>')
+@admin_required
+def admin_project_detail(record_id):
+    """Admin project detail page"""
+    try:
+        project_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        project_response = requests.get(project_url, headers=headers)
+        
+        if project_response.status_code != 200:
+            logger.error(f"Failed to fetch project: {project_response.text}")
+            flash('Project not found', 'error')
+            return redirect(url_for('admin_projects'))
+        
+        project_data = project_response.json()
+        project_name = project_data['fields']['Project Name']
+        
+        logs_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
+        
+        params = {
+            'filterByFormula': f"{{Project Name}} = '{project_name}'",
+            'sort[0][field]': 'Created At',
+            'sort[0][direction]': 'desc'
+        }
+        
+        logs_response = requests.get(logs_url, headers=headers, params=params)
+        
+        if logs_response.status_code == 200:
+            logs_data = logs_response.json()
+            logs = logs_data.get('records', [])
+            return render_template('admin/project_detail.html', project=project_data, logs=logs)
+        else:
+            logger.error(f"Airtable logs fetch failed: {logs_response.text}")
+            flash('Failed to fetch project logs', 'warning')
+            return render_template('admin/project_detail.html', project=project_data, logs=[])
+    except Exception as e:
+        logger.error(f"Error fetching project details: {str(e)}")
+        flash('An error occurred while fetching project details', 'error')
+        return redirect(url_for('admin_projects'))
+
+@app.route('/api/admin/projects/<project_id>/log-count', methods=['GET'])
+@admin_required
+def api_admin_project_log_count(project_id):
+    """API endpoint to get the count of logs for a specific project."""
+    try:
+        logs_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        project_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_PROJECTS_TABLE}/{project_id}"
+        project_response = requests.get(project_url, headers=headers)
+        
+        if project_response.status_code != 200:
+            logger.error(f"Failed to fetch project: {project_response.text}")
+            return jsonify({'count': 0})
+        
+        project_data = project_response.json()
+        project_name = project_data['fields']['Project Name']
+        
+        params = {
+            'filterByFormula': f"{{Project Name}} = '{project_name}'"
+        }
+        
+        logs_response = requests.get(logs_url, headers=headers, params=params)
+        
+        if logs_response.status_code == 200:
+            logs_data = logs_response.json()
+            logs = logs_data.get('records', [])
+            return jsonify({'count': len(logs)})
+        else:
+            logger.error(f"Airtable logs fetch failed: {logs_response.text}")
+            return jsonify({'count': 0})
+            
+    except Exception as e:
+        logger.error(f"Error fetching log count: {str(e)}")
+        return jsonify({'count': 0})
+
+@app.route('/api/admin/recent-logs', methods=['GET'])
+@admin_required
+def api_admin_recent_logs():
+    """API endpoint to get recent logs for the admin dashboard."""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        params = {
+            'sort[0][field]': 'Created At',
+            'sort[0][direction]': 'desc',
+            'maxRecords': 10
+        }
+        
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify(data.get('records', []))
+        else:
+            logger.error(f"Airtable fetch failed: {response.text}")
+            return jsonify([])
+            
+    except Exception as e:
+        logger.error(f"Error fetching recent logs: {str(e)}")
+        return jsonify([])
+
+@app.route('/admin/logs/<record_id>', methods=['GET'])
+@admin_required
+def admin_log_detail(record_id):
+    """Admin log detail page"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
+        headers = {'Authorization': f'Bearer {AIRTABLE_API_KEY}'}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            log_data = response.json()
+            
+            project_name = log_data['fields'].get('Project Name', 'Unknown Project')
+            
+            project_id = None
+            if 'Project' in log_data['fields'] and isinstance(log_data['fields']['Project'], list) and log_data['fields']['Project']:
+                project_id = log_data['fields']['Project'][0]
+            
+            what_did = log_data['fields'].get('What I Did', '')
+            issues_faced = log_data['fields'].get('Issues Faced', '')
+            next_steps = log_data['fields'].get('Next Steps', '')
+            
+            content = f"<h4>What I Did</h4><p>{what_did}</p>"
+            
+            if issues_faced:
+                content += f"<h4>Issues Faced</h4><p>{issues_faced}</p>"
+                
+            if next_steps:
+                content += f"<h4>Next Steps</h4><p>{next_steps}</p>"
+            
+            log_data['fields']['Content'] = content
+            
+            if 'Media URL' in log_data['fields'] and log_data['fields']['Media URL'] and 'Media' not in log_data['fields']:
+                media_url = log_data['fields']['Media URL']
+                log_data['fields']['Media'] = [{'url': media_url, 'filename': 'media.jpg'}]
+                logger.info(f"Added Media field from Media URL: {media_url}")
+            
+            logger.info(f"Log data fields: {log_data['fields'].keys()}")
+            if 'Media' in log_data['fields']:
+                logger.info(f"Media field: {log_data['fields']['Media']}")
+            if 'Media URL' in log_data['fields']:
+                logger.info(f"Media URL field: {log_data['fields']['Media URL']}")
+                
+            logger.info(f"Complete log data: {log_data}")
+            
+            return render_template('admin/log_detail.html', log=log_data, project_name=project_name, project_id=project_id)
+        else:
+            logger.error(f"Airtable fetch failed: {response.text}")
+            flash('Log not found', 'error')
+            return redirect(url_for('admin_dashboard'))
+            
+    except Exception as e:
+        logger.error(f"Error fetching log: {str(e)}")
+        flash('An error occurred while fetching log details', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/logs/<record_id>/update', methods=['POST'])
+@admin_required
+def admin_update_log(record_id):
+    """Update log status as admin"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        status = request.form.get('status')
+        
+        if not status:
+            flash('Status is required', 'error')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+        
+        update_payload = {
+            'fields': {
+                'Status': status
+            }
+        }
+        
+        update_response = requests.patch(url, headers=headers, json=update_payload)
+        
+        if update_response.status_code == 200:
+            flash('Log updated successfully', 'success')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+        else:
+            logger.error(f"Airtable update failed: {update_response.text}")
+            flash('Failed to update log', 'error')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+            
+    except Exception as e:
+        logger.error(f"Error updating log: {str(e)}")
+        flash('An error occurred while updating log', 'error')
+        return redirect(url_for('admin_log_detail', record_id=record_id))
+
+@app.route('/admin/logs/<record_id>/update-time', methods=['POST'])
+@admin_required
+def admin_update_log_time(record_id):
+    """Update log time spent as admin"""
+    try:
+        url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}/{record_id}"
+        headers = {
+            'Authorization': f'Bearer {AIRTABLE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        time_spent = request.form.get('time_spent')
+        
+        if not time_spent:
+            flash('Time spent is required', 'error')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+        
+        try:
+            time_spent = int(time_spent)
+            if time_spent < 0:
+                raise ValueError("Time spent cannot be negative")
+        except ValueError:
+            flash('Time spent must be a positive number', 'error')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+        
+        update_payload = {
+            'fields': {
+                'Time Spent (minutes)': time_spent
+            }
+        }
+        
+        update_response = requests.patch(url, headers=headers, json=update_payload)
+        
+        if update_response.status_code == 200:
+            flash('Log time updated successfully', 'success')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+        else:
+            logger.error(f"Airtable update failed: {update_response.text}")
+            flash('Failed to update log time', 'error')
+            return redirect(url_for('admin_log_detail', record_id=record_id))
+            
+    except Exception as e:
+        logger.error(f"Error updating log time: {str(e)}")
+        flash('An error occurred while updating log time', 'error')
+        return redirect(url_for('admin_log_detail', record_id=record_id))
 
 @app.route('/')
 def index():
@@ -762,21 +1240,17 @@ def settings_page():
 @login_required
 def save_settings():
     """Save user settings"""
-    # Get form data
     enable_animations = 'enable_animations' in request.form
     reduced_motion = 'reduced_motion' in request.form
     project_reminders = 'project_reminders' in request.form
     
-    # Get use_static_props value from the hidden input
     use_static_props_value = request.form.get('use_static_props', 'off')
     use_static_props = (use_static_props_value == 'on')
     
-    # Debug logging
     logger.info(f"Form data: {dict(request.form)}")
     logger.info(f"use_static_props value: {use_static_props_value}")
     logger.info(f"use_static_props boolean: {use_static_props}")
     
-    # Get current settings to preserve last_refreshed value if it exists
     current_settings = get_user_settings(session['user_id'])
     last_refreshed = current_settings.get('last_refreshed')
     
@@ -788,7 +1262,6 @@ def save_settings():
         'last_refreshed': last_refreshed
     }
     
-    # Debug logging
     logger.info(f"Settings to save: {settings}")
     
     success = save_user_settings(session['user_id'], settings)
@@ -805,13 +1278,11 @@ def save_settings():
 def refresh_data():
     """Refresh data from Airtable and update last_refreshed timestamp"""
     try:
-        # Clear any cached data in session
         if 'projects_cache' in session:
             session.pop('projects_cache')
         if 'logs_cache' in session:
             session.pop('logs_cache')
         
-        # Update the last_refreshed timestamp
         current_settings = get_user_settings(session['user_id'])
         current_settings['last_refreshed'] = datetime.now().isoformat()
         
@@ -862,9 +1333,38 @@ def auth_callback():
             user_info = user_info_response.json()
             
             if user_info.get('ok'):
-                session['user_id'] = user_info['user']['id']
-                session['user_name'] = user_info['user']['real_name']
+                slack_user = user_info['user']
+                session['user_id'] = slack_user['id']
+                session['user_name'] = slack_user['real_name']
                 session['access_token'] = auth_data['access_token']
+                
+                existing_user = get_user_from_airtable(slack_user['id'])
+                
+                if not existing_user:
+                    user_data = {
+                        'User ID': slack_user['id'],
+                        'User Name': slack_user['real_name'],
+                        'Email': slack_user.get('profile', {}).get('email', ''),
+                        'Avatar URL': slack_user.get('profile', {}).get('image_192', ''),
+                        'Slack Team ID': slack_user.get('team_id', ''),
+                        'Is Admin': 'false',  # Default to non-admin (string value for Airtable)
+                        'Created At': datetime.now().isoformat()
+                    }
+                    save_user_to_airtable(user_data)
+                    logger.info(f"Created new user: {slack_user['id']}")
+                else:
+                    record_id = existing_user['id']
+                    user_data = {
+                        'User Name': slack_user['real_name'],
+                        'Email': slack_user.get('profile', {}).get('email', ''),
+                        'Avatar URL': slack_user.get('profile', {}).get('image_192', ''),
+                        'Last Login': datetime.now().isoformat()
+                    }
+                    update_user_in_airtable(record_id, user_data)
+                    logger.info(f"Updated existing user: {slack_user['id']}")
+                    
+                    admin_value = existing_user.get('fields', {}).get('Is Admin', 'false')
+                    session['is_admin'] = admin_value == True or admin_value == 'true'
                 
                 flash(f'Welcome, {session["user_name"]}!', 'success')
                 return redirect(url_for('index'))
@@ -947,7 +1447,6 @@ def create_log():
             airtable_result = save_to_airtable(log_data)
             
             if airtable_result:
-                # Clear logs cache when a new log is created
                 if 'logs_cache' in session:
                     session.pop('logs_cache')
                     logger.info("Cleared logs cache after creating log")

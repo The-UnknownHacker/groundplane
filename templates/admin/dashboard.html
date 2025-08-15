@@ -1,0 +1,117 @@
+{% extends "admin/base.html" %}
+
+{% block title %}dis the cool kid dash{% endblock %}
+
+{% block header %}dis the cool kid dash{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Projects</h5>
+                <p class="card-text">lets see what em fraudsters are making</p>
+                <a href="{{ url_for('admin_projects') }}" class="btn btn-primary">View Projects</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Users</h5>
+                <p class="card-text">lets see what em fraudsters</p>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-primary">View Users</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <h3>recent lawgs</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Project</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-logs">
+                    <tr>
+                        <td colspan="6" class="text-center">Loading recent logs...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch recent logs
+        fetch('/api/admin/recent-logs')
+            .then(response => response.json())
+            .then(data => {
+                const logsTable = document.getElementById('recent-logs');
+                
+                if (data.length === 0) {
+                    logsTable.innerHTML = '<tr><td colspan="6" class="text-center">No recent logs found</td></tr>';
+                    return;
+                }
+                
+                logsTable.innerHTML = '';
+                
+                data.forEach(log => {
+                    const fields = log.fields;
+                    const date = new Date(fields['Created At']);
+                    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${fields['User Name']}</td>
+                        <td>${fields['Project Name']}</td>
+                        <td>${fields['Title'] || 'Untitled'}</td>
+                        <td>
+                            <span class="badge ${getBadgeClass(fields['Status'])}">                                
+                                ${fields['Status'] || 'Pending'}
+                            </span>
+                        </td>
+                        <td>${formattedDate}</td>
+                        <td>
+                            <a href="/admin/logs/${log.id}" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    `;
+                    
+                    logsTable.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching recent logs:', error);
+                const logsTable = document.getElementById('recent-logs');
+                logsTable.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading logs</td></tr>';
+            });
+    });
+    
+    function getBadgeClass(status) {
+        switch(status) {
+            case 'Approved':
+                return 'bg-success';
+            case 'Rejected':
+                return 'bg-danger';
+            case 'Pending':
+                return 'bg-warning';
+            case 'In Review':
+                return 'bg-info';
+            default:
+                return 'bg-secondary';
+        }
+    }
+</script>
+{% endblock %}

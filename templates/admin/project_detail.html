@@ -1,0 +1,173 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin - Project Details{% endblock %}
+
+{% block header %}Project Details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title">{{ project.fields['Project Name'] }}</h5>
+                    <a href="{{ url_for('admin_projects') }}" class="btn btn-outline-secondary">Back to Projects</a>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>User:</strong> {{ project.fields['User Name'] }}</p>
+                        <p><strong>Created:</strong> 
+                            {% if project.fields['Created At'] %}
+                                {{ project.fields['Created At']|string|replace('T', ' ')|truncate(16, True, '') }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </p>
+                        {% if project.fields['Github Link'] %}
+                            <p><strong>GitHub:</strong> <a href="{{ project.fields['Github Link'] }}" target="_blank">{{ project.fields['Github Link'] }}</a></p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if project.fields['Description'] %}
+                            <p><strong>Description:</strong></p>
+                            <p>{{ project.fields['Description'] }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if project.fields['Cover Image URL'] %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <img src="{{ project.fields['Cover Image URL'] }}" alt="Project Cover" class="img-fluid rounded" style="max-height: 300px;">
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Project Logs</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Created</th>
+                                <th>Time Spent</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if logs %}
+                                {% for log in logs %}
+                                    <tr>
+                                        <td>{{ log.fields['Title'] }}</td>
+                                        <td>
+                                            {% if log.fields['Created At'] %}
+                                                {{ log.fields['Created At']|string|replace('T', ' ')|truncate(16, True, '') }}
+                                            {% else %}
+                                                Unknown
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if log.fields['Time Spent (minutes)'] %}
+                                                {% set minutes = log.fields['Time Spent (minutes)']|int %}
+                                                {% if minutes >= 60 %}
+                                                    {{ (minutes / 60)|int }}h {{ minutes % 60 }}m
+                                                {% else %}
+                                                    {{ minutes }}m
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ get_status_class(log.fields['Status']) }}">
+                                                {{ log.fields['Status'] or 'Pending' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if log.fields['Media'] %}
+                                                <a href="#" data-bs-toggle="modal" data-bs-target="#mediaModal{{ log.id }}" class="btn btn-sm btn-info me-1">
+                                                    <i class="bi bi-image"></i>
+                                                </a>
+                                            {% endif %}
+                                            <a href="{{ url_for('admin_log_detail', record_id=log.id) }}" class="btn btn-sm btn-primary">da deets</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No logs found for this project</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% if logs %}
+    {% for log in logs %}
+        {% if log.fields['Media'] %}
+            <!-- Media Modal for each log -->
+            <div class="modal fade" id="mediaModal{{ log.id }}" tabindex="-1" aria-labelledby="mediaModalLabel{{ log.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="mediaModalLabel{{ log.id }}">Media for: {{ log.fields['Title'] }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                {% for media in log.fields['Media'] %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <img src="{{ media.url }}" class="card-img-top" alt="Media">
+                                            <div class="card-body text-center">
+                                                <a href="{{ media.url }}" target="_blank" class="btn btn-sm btn-primary">View Full Size</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a href="{{ url_for('admin_log_detail', record_id=log.id) }}" class="btn btn-primary">Go to Log Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{% block scripts %}
+<script>
+    function get_status_class(status) {
+        switch(status) {
+            case 'Approved':
+                return 'bg-success';
+            case 'Rejected':
+                return 'bg-danger';
+            case 'Pending':
+                return 'bg-warning';
+            case 'In Review':
+                return 'bg-info';
+            default:
+                return 'bg-secondary';
+        }
+    }
+</script>
+{% endblock %}
