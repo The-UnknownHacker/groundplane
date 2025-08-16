@@ -59,7 +59,7 @@
                                         <td>{{ user.fields['Slack ID'] }}</td>
                                         <td>{{ user.fields['Email'] }}</td>
                                         <td>
-                                            {% if user.fields['Is Admin'] %}
+                                            {% if user.fields['Is Admin'] == 'true' or user.fields['Is Admin'] == True %}
                                                 <span class="badge bg-success">Admin</span>
                                             {% else %}
                                                 <span class="badge bg-secondary">User</span>
@@ -67,9 +67,9 @@
                                         </td>
                                         <td>
                                             <form action="{{ url_for('admin_toggle_user_admin', record_id=user.id) }}" method="POST" class="d-inline">
-                                                <input type="hidden" name="is_admin" value="{{ not user.fields['Is Admin'] }}">
-                                                <button type="submit" class="btn btn-sm {% if user.fields['Is Admin'] %}btn-warning{% else %}btn-success{% endif %}">
-                                                    {% if user.fields['Is Admin'] %}
+                                                <input type="hidden" name="is_admin" value="{{ not (user.fields['Is Admin'] == 'true' or user.fields['Is Admin'] == True) }}">
+                                                <button type="submit" class="btn btn-sm {% if user.fields['Is Admin'] == 'true' or user.fields['Is Admin'] == True %}btn-warning{% else %}btn-success{% endif %}">
+                                                    {% if user.fields['Is Admin'] == 'true' or user.fields['Is Admin'] == True %}
                                                         Remove Admin
                                                     {% else %}
                                                         Make Admin

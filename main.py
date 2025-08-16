@@ -571,7 +571,6 @@ def update_project(record_id):
         update_response = requests.patch(url, headers=headers, json=update_payload)
         
         if update_response.status_code == 200:
-            # Clear projects cache when a project is updated
             if 'projects_cache' in session:
                 session.pop('projects_cache')
                 logger.info("Cleared projects cache after updating project")
@@ -672,7 +671,6 @@ def create_project_page():
             airtable_result = save_project_to_airtable(project_data)
             
             if airtable_result:
-                # Clear projects cache when a new project is created via form
                 if 'projects_cache' in session:
                     session.pop('projects_cache')
                     logger.info("Cleared projects cache after creating new project via form")
@@ -725,7 +723,6 @@ def get_user_settings(user_id):
 
 def save_user_settings(user_id, settings):
     """Save user settings to session only (local cache)"""
-    # Save to session
     session_settings = {
         'record_id': None,
         'enable_animations': settings.get('enable_animations', True),

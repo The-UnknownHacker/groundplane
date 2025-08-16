@@ -20,7 +20,7 @@
                         <p><strong>Email:</strong> {{ user.fields['Email'] }}</p>
                         <p>
                             <strong>Admin Status:</strong> 
-                            {% if user.fields['Is Admin'] %}
+                            {% if user.fields['Is Admin'] == 'true' or user.fields['Is Admin'] == True %}
                                 <span class="badge bg-success">Admin</span>
                             {% else %}
                                 <span class="badge bg-secondary">User</span>
