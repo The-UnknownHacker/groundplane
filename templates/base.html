@@ -225,11 +225,94 @@
     {% if user_settings is defined %}
     <style>
         {% if not user_settings.enable_animations %}
-        /* Disable animations when user has turned them off */
+        /* Disable animations when user has turned them off but keep UI natural */
         * {
             animation: none !important;
             transition: none !important;
             transform: none !important;
+        }
+        
+        /* Ensure links still work when animations are disabled */
+        a, button, [role="button"], .btn-primary, .btn-secondary, .btn-accent {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            -webkit-tap-highlight-color: transparent !important;
+            user-select: none !important;
+        }
+        
+        /* Fix for links not working */
+        a[href]:not([href=""]) {
+            color: inherit !important;
+            text-decoration: none !important;
+        }
+        
+        /* Alternative styles for buttons when animations are disabled */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8c37, #ec3750, #a633d6) !important;
+            background-size: 100% 100% !important;
+            box-shadow: 0 4px 10px rgba(255, 140, 55, 0.3) !important;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff9d55, #ee5a70, #b655d9) !important;
+            box-shadow: 0 4px 15px rgba(255, 140, 55, 0.5) !important;
+            filter: brightness(1.1) !important;
+        }
+        
+        .btn-primary:active {
+            filter: brightness(0.9) !important;
+            box-shadow: 0 2px 8px rgba(255, 140, 55, 0.3) !important;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #33d6a6, #5bc0de, #338eda) !important;
+            background-size: 100% 100% !important;
+            box-shadow: 0 4px 10px rgba(51, 214, 166, 0.3) !important;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #50dbb5, #75c9e3, #55a1e0) !important;
+            box-shadow: 0 4px 15px rgba(51, 214, 166, 0.5) !important;
+            filter: brightness(1.1) !important;
+        }
+        
+        .btn-secondary:active {
+            filter: brightness(0.9) !important;
+            box-shadow: 0 2px 8px rgba(51, 214, 166, 0.3) !important;
+        }
+        
+        .btn-accent {
+            background: linear-gradient(135deg, #f1c40f, #ff8c37) !important;
+            background-size: 100% 100% !important;
+            box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3) !important;
+        }
+        
+        .btn-accent:hover {
+            background: linear-gradient(135deg, #f3cd3c, #ff9d55) !important;
+            filter: brightness(1.1) !important;
+            box-shadow: 0 4px 15px rgba(241, 196, 15, 0.5) !important;
+        }
+        
+        .btn-accent:active {
+            filter: brightness(0.9) !important;
+            box-shadow: 0 2px 8px rgba(241, 196, 15, 0.3) !important;
+        }
+        
+        /* Improved card styles */
+        .glass-card {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Static gradient for top bar */
+        .fixed.top-0.left-0.w-full.h-1 {
+            background: linear-gradient(90deg, #ff8c37, #ec3750, #a633d6) !important;
+            opacity: 0.9 !important;
         }
         {% endif %}
         
@@ -244,6 +327,14 @@
     {% endif %}
 </head>
 <body class="bg-animated min-h-screen text-white font-phantom{% if user_settings is defined and not user_settings.enable_animations %} no-animations{% endif %}{% if user_settings is defined and user_settings.reduced_motion %} reduced-motion{% endif %}">
+    <!-- Static background alternative when animations disabled -->
+    {% if user_settings is defined and not user_settings.enable_animations %}
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-orange/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-3/4 right-1/4 w-48 h-48 bg-primary-purple/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-24 h-24 bg-primary-red/10 rounded-full blur-3xl"></div>
+    </div>
+    {% endif %}
     <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-orange via-primary-red to-primary-purple animate-pulse-glow z-50"></div>
 
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">

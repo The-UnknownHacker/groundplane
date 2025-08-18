@@ -79,7 +79,7 @@
             </div>
             
             <div class="flex justify-between items-center mt-8">
-                <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 text-white rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-slate-500/25 transform hover:scale-105">
+                <a href="{{ url_for('index') }}" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 text-white rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-slate-500/25 transform hover:scale-105 no-underline">
                     <i class='bx bx-arrow-back'></i> Back to Dashboard
                 </a>
                 <button type="submit" class="btn-primary px-6 py-3 text-white rounded-lg font-semibold flex items-center gap-2 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-300">
@@ -100,7 +100,7 @@
         const lastRefreshedTime = document.getElementById('last-refreshed-time');
         const settingsForm = document.getElementById('settings-form');
         
-        // Handle animations toggle
+        // Handle animations toggle with improved feedback
         if (!animationsToggle.checked) {
             document.body.classList.add('no-animations');
         }
@@ -108,8 +108,24 @@
         animationsToggle.addEventListener('change', function() {
             if (this.checked) {
                 document.body.classList.remove('no-animations');
+                
+                // Provide visual feedback when enabling animations
+                const settingsCards = document.querySelectorAll('.glass-card');
+                settingsCards.forEach(card => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.transform = 'scale(1.01)';
+                    setTimeout(() => {
+                        card.style.transform = 'scale(1)';
+                    }, 300);
+                });
             } else {
                 document.body.classList.add('no-animations');
+                
+                // Provide subtle visual feedback when disabling animations
+                const settingsCards = document.querySelectorAll('.glass-card');
+                settingsCards.forEach(card => {
+                    card.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
+                });
             }
         });
         
@@ -237,7 +253,34 @@
     .no-animations * {
         animation: none !important;
         transition: none !important;
-        transform: none !important;
+    }
+    
+    /* Ensure clickable elements remain functional */
+    .no-animations button,
+    .no-animations a {
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 999 !important;
+    }
+    
+    /* Improved hover effects for when animations are disabled */
+    .no-animations .glass-card:hover {
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+        filter: brightness(1.05) !important;
+    }
+    
+    .no-animations button:hover,
+    .no-animations a:hover {
+        filter: brightness(1.1) !important;
+    }
+    
+    /* Improved focus states for form elements */
+    .no-animations input:focus,
+    .no-animations select:focus,
+    .no-animations textarea:focus {
+        outline: 2px solid rgba(255, 140, 55, 0.5) !important;
+        box-shadow: 0 0 0 3px rgba(255, 140, 55, 0.25) !important;
     }
 </style>
 {% endblock %}

@@ -100,7 +100,7 @@ def create_temp_file_url(file_path):
         
         temp_files[file_id] = temp_file_path
         
-        base_url = request.url_root if request else "http://localhost:5000/"
+        base_url = request.url_root if request else "https://localhost:5000/"
         temp_url = f"{base_url}temp/{file_id}"
         
         logger.info(f"Created temp URL: {temp_url}")
@@ -1753,12 +1753,12 @@ if __name__ == '__main__':
             print("To generate self-signed certificates, run:")
             print("openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes")
             print("\nAlternatively, running on HTTP for now...")
-            print(f"🚀 Starting HTTP server at http://localhost:{port}")
+            print(f"🚀 Starting HTTP server at https://localhost:{port}")
             app.run(debug=True, port=port)
             
     except Exception as e:
         print(f"❌ SSL setup failed: {e}")
-        print(f"🚀 Starting HTTP server at http://localhost:{port}")
+        print(f"🚀 Starting HTTP server at https://localhost:{port}")
         app.run(debug=True, port=port)
         
         
